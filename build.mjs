@@ -60,7 +60,7 @@ function layout({ title, description, body, active, canonical }) {
   <meta name="description" content="${escape(description)}">
   ${canonical ? `<link rel="canonical" href="${canonical}">` : ''}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=compare">
+  <link rel="stylesheet" href="/assets/directory.css?v=profiles">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -223,30 +223,49 @@ for (const tool of tools) {
   const category = categories[tool.category];
   const parent = category || topic;
   const parentUrl = category ? categoryUrl(tool.category) : topicUrl(topicId);
+  const peers = category ? toolsForCategory(tool.category) : toolsForTopic(topicId);
+  const related = peers.filter(peer => peer.id !== tool.id).slice(0, 3);
   await page(`tools/${tool.id}/index.html`, {
     title: `${tool.name} for Shopify`,
     description: tool.summary,
     active: 'directory',
     body: `<article class="shell inner tool-page">
       <a class="crumb" href="${parentUrl}">${chevron} ${escape(parent.title)}</a>
-      <header class="inner-heading">
-        <h1>${escape(tool.name)}</h1>
-        <p class="lede">${escape(tool.summary)}</p>
-        ${icon(parent.symbol)}
-      </header>
-      <section class="profile-grid tool-profile" aria-label="Tool details">
-        <dl class="details">
+      <div class="tool-overview">
+        <header class="tool-heading">
+          <div class="tool-mark">${icon(parent.symbol)}${tool.sponsored ? '<span class="badge">Sponsored</span>' : ''}</div>
+          <h1>${escape(tool.name)}</h1>
+          <p class="lede">${escape(tool.summary)}</p>
+        </header>
+        <section class="tool-links" aria-labelledby="price-heading">
+          <div class="tool-pricing">
+            <h2 id="price-heading">Listed price</h2>
+            <div class="tool-profile-price">${priceLabel(tool.pricing, true)}</div>
+            ${tool.pricing?.note ? `<p class="source-note">${escape(tool.pricing.note)}</p>` : ''}
+          </div>
+          <div class="tool-actions">
+            <a class="button" href="${escape(tool.website)}">Visit official website</a>
+            <a class="text-link" href="${escape(listingUrl(tool))}">Shopify App Store listing</a>
+            <p class="source-note">Pricing checked <time datetime="${reviewed}">November 21, 2026</time>. Usage and carrier fees may apply.</p>
+          </div>
+        </section>
+        <dl class="details tool-facts">
           <div><dt>Best for</dt><dd>${escape(tool.audience)}</dd></div>
           <div><dt>Key features</dt><dd>${featureTags(tool)}</dd></div>
-          <div><dt>Listed price</dt><dd class="tool-profile-price">${priceLabel(tool.pricing, true)}${tool.pricing?.note ? `<p class="source-note">${escape(tool.pricing.note)}</p>` : ''}</dd></div>
           <div><dt>Sponsored</dt><dd>${tool.sponsored ? 'Yes' : 'No'}</dd></div>
         </dl>
-        <div class="action-panel">
-          <a class="button" href="${escape(tool.website)}">Official website</a>
-          <a class="text-link" href="${escape(listingUrl(tool))}">Shopify App Store source</a>
-          <p class="source-note">Pricing checked <time datetime="${reviewed}">November 21, 2026</time>. Usage and carrier fees may apply.</p>
+      </div>
+      ${related.length ? `<section class="related" aria-labelledby="related-heading">
+        <div class="section-head">
+          <h2 id="related-heading">Compare related apps</h2>
+          <a class="text-link" href="${parentUrl}">View all ${escape(parent.title.toLowerCase())} tools</a>
         </div>
-      </section>
+        <ul class="related-tools">${related.map(peer => `<li><a class="related-tool" href="${toolUrl(peer.id)}">
+          <div class="related-name"><span class="tool-name">${escape(peer.name)}</span>${peer.sponsored ? '<span class="badge">Sponsored</span>' : ''}</div>
+          <div class="related-price">${priceLabel(peer.pricing)}</div>
+          ${chevron}
+        </a></li>`).join('')}</ul>
+      </section>` : ''}
     </article>`,
   });
 }
@@ -256,23 +275,46 @@ await page('sponsor/index.html', {
   description: 'Apply for a labeled featured spot in the Commerce Shelf Shopify app directory.',
   active: 'sponsor',
   body: `<div class="shell inner sponsor">
-    <header class="inner-heading">
-      <h1>Reach merchants choosing a Shopify app.</h1>
-      <p class="lede">Request a featured spot on the topic page that best fits your app.</p>
-    </header>
-    <div class="profile-grid">
-      <dl class="details">
-        <div><dt>Placement</dt><dd>Your app appears at the top of a relevant topic list. On the returns topic, it appears at the top of the relevant subcategory.</dd></div>
-        <div><dt>Duration</dt><dd>Request a 30-day placement. We confirm the start date and pricing after review.</dd></div>
-        <div><dt>Disclosure</dt><dd>Featured listings carry a Sponsored label in the directory and on the tool page.</dd></div>
-        <div><dt>Eligibility</dt><dd>Live Shopify apps that fit one of the directory’s current topics.</dd></div>
-      </dl>
-      <div class="action-panel">
-        <h2>Application details</h2>
-        <p>Include your app name, Shopify App Store URL, preferred topic, the merchants you serve, and your preferred start date.</p>
-        <a class="button" href="${escape(stripe || application.href)}">${stripe ? 'Pay with Stripe' : 'Apply for placement'}</a>
-        ${stripe ? '' : '<p>Applications are public on GitHub.</p>'}
-      </div>
+    <div class="sponsor-intro">
+      <header>
+        <h1>Get featured on Commerce Shelf.</h1>
+        <p class="lede">Request a 30-day sponsored placement where merchants compare Shopify apps for the same task.</p>
+        <div class="sponsor-actions">
+          <a class="button" href="${escape(stripe || application.href)}">${stripe ? 'Pay with Stripe' : 'Apply for placement'}</a>
+          <a class="text-link" href="#application">See application details</a>
+        </div>
+      </header>
+      <figure class="sponsor-preview">
+        <figcaption>Example placement</figcaption>
+        <div class="preview-list">
+          <div class="preview-topic">${icon(topics.tracking.symbol)}<strong>${escape(topics.tracking.title)}</strong></div>
+          <div class="preview-app">
+            <div><strong>Your Shopify app</strong><span class="badge">Sponsored</span></div>
+            <p>At the top of the topic’s comparison list.</p>
+          </div>
+          <p class="preview-other">Other apps in this topic</p>
+        </div>
+      </figure>
+    </div>
+    <div class="sponsor-information">
+      <section aria-labelledby="placement-heading">
+        <h2 id="placement-heading">Placement details</h2>
+        <dl class="details">
+          <div><dt>Position</dt><dd>At the top of one topic list. For returns apps, placement is at the top of the relevant subcategory.</dd></div>
+          <div><dt>Term</dt><dd>30 days. We confirm availability, the start date, and pricing after review.</dd></div>
+          <div><dt>Label</dt><dd>Sponsored appears on your directory listing and your app detail page.</dd></div>
+          <div><dt>Eligibility</dt><dd>Live Shopify apps that fit <a class="text-link" href="/#directory">one of the directory’s topics</a>.</dd></div>
+        </dl>
+      </section>
+      <section class="application-panel" id="application" aria-labelledby="application-heading">
+        <h2 id="application-heading">What to include</h2>
+        <ul>
+          <li>App name and Shopify App Store URL</li>
+          <li>Preferred topic and the merchants your app serves</li>
+          <li>Preferred start date</li>
+        </ul>
+        <p class="source-note">${stripe ? `<a class="text-link" href="${escape(application.href)}">Open the public application on GitHub</a>` : 'The application is a public GitHub issue.'}</p>
+      </section>
     </div>
   </div>`,
 });
