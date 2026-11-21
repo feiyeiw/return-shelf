@@ -1,6 +1,7 @@
 import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { categories, tools as returnTools, reviewed, listingUrl } from './directory.mjs';
 import { topics, additionalTools } from './shopify.mjs';
+import { homeQuestions, topicQuestions, returnCategoryQuestions, toolQuestions, sponsorQuestions } from './faq.mjs';
 
 const siteName = 'Commerce Shelf';
 const siteUrl = 'https://commerceshelf.com';
@@ -30,6 +31,9 @@ const chevron = '<span class="chevron" aria-hidden="true"></span>';
 const bySponsorship = (a, b) => Number(b.sponsored) - Number(a.sponsored);
 const toolsForCategory = id => returnTools.filter(tool => tool.category === id).sort(bySponsorship);
 const toolsForTopic = id => tools.filter(tool => topicOf(tool) === id).sort(bySponsorship);
+const homeTrail = [['Home', '/']];
+const topicTrail = id => [...homeTrail, [topics[id].title, topicUrl(id)]];
+const categoryTrail = id => [...topicTrail('returns'), [categories[id].title, categoryUrl(id)]];
 
 function usd(amount) {
   return `US$${amount.toLocaleString('en-US', { minimumFractionDigits: Number.isInteger(amount) ? 0 : 2 })}`;
@@ -50,7 +54,68 @@ function priceLabel(pricing, full = false) {
 
 const featureTags = tool => `<ul class="tags">${tool.tags.map(tag => `<li>${escape(tag)}</li>`).join('')}</ul>`;
 
-function layout({ title, description, body, active, canonical }) {
+function pricingAnswer(tool) {
+  if (!tool.pricing) return 'Public pricing is unknown. Check the Shopify App Store listing or ask the vendor for current terms.';
+  const { free, from, to, note } = tool.pricing;
+  if (free === 'only') return note || `The Shopify App Store lists ${tool.name} as free. Check the listing for current terms.`;
+  const paid = to > from ? `range from ${usd(from)} to ${usd(to)} per month`
+    : to === from ? `cost ${usd(from)} per month`
+    : `start at ${usd(from)} per month`;
+  const freeTerms = {
+    plan: 'The listing also shows a free plan with its own limits.',
+    install: 'It is free to install. Paid features or usage charges can still apply.',
+    conditional: 'The listing also shows a free option with eligibility or funding conditions.',
+  }[free];
+  return `Published paid plans for ${tool.name} ${paid}. ${note || freeTerms || 'Check the app listing for current fees and plan limits.'}`;
+}
+
+function questions(title, entries) {
+  return `<section class="faq" id="faq" aria-labelledby="faq-heading">
+    <h2 id="faq-heading">${escape(title)}</h2>
+    <div class="faq-list">${entries.map(([question, answer, source]) => {
+      const id = question.toLowerCase().replace(/[^a-z0-9]+/g, '-').replace(/^-|-$/g, '');
+      return `<article class="faq-answer" id="faq-${id}">
+        <h3>${escape(question)}</h3>
+        <p>${escape(answer)}</p>
+        ${source ? `<p class="faq-source"><a class="text-link" href="${escape(source[1])}">${escape(source[0])}</a></p>` : ''}
+      </article>`;
+    }).join('')}</div>
+  </section>`;
+}
+
+function breadcrumbs(trail) {
+  return `<nav class="breadcrumbs" aria-label="Breadcrumb"><ol>${trail.map(([name, path], index) =>
+    index === trail.length - 1 ? `<li aria-current="page">${escape(name)}</li>`
+      : `<li><a href="${escape(path)}">${escape(name)}</a></li>`,
+  ).join('')}</ol></nav>`;
+}
+
+function structuredData({ title, description, canonical, list, trail }) {
+  if (!canonical) return '';
+  const website = { '@type': 'WebSite', '@id': `${siteUrl}/#website`, name: siteName, url: `${siteUrl}/` };
+  const webPage = {
+    '@type': list ? 'CollectionPage' : 'WebPage', '@id': canonical, url: canonical,
+    name: title, description, inLanguage: 'en', isPartOf: { '@id': website['@id'] },
+  };
+  const graph = [website, webPage];
+  const listItems = entries => entries.map(([name, path], index) => ({ '@type': 'ListItem', position: index + 1, name, item: new URL(path, siteUrl).href }));
+  if (trail) {
+    const breadcrumbId = `${canonical}#breadcrumb`;
+    webPage.breadcrumb = { '@id': breadcrumbId };
+    graph.push({ '@type': 'BreadcrumbList', '@id': breadcrumbId, itemListElement: listItems(trail) });
+  }
+  if (list) {
+    const listId = `${canonical}${canonical === `${siteUrl}/` ? '#directory' : '#compare'}`;
+    webPage.mainEntity = { '@id': listId };
+    graph.push({ '@type': 'ItemList', '@id': listId, numberOfItems: list.length, itemListElement: listItems(list) });
+  }
+  const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
+  return `<script type="application/ld+json">${json}</script>`;
+}
+
+const toolListEntries = items => items.map(tool => [tool.name, toolUrl(tool.id)]);
+
+function layout({ title, description, body, active, canonical, list, trail }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -59,8 +124,9 @@ function layout({ title, description, body, active, canonical }) {
   <title>${escape(title)} | ${siteName}</title>
   <meta name="description" content="${escape(description)}">
   ${canonical ? `<link rel="canonical" href="${canonical}">` : ''}
+  ${structuredData({ title, description, canonical, list, trail })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=profiles">
+  <link rel="stylesheet" href="/assets/directory.css?v=questions">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -162,6 +228,7 @@ await page('index.html', {
   title: 'Shopify app directory by task',
   description: positioning,
   active: 'directory',
+  list: Object.entries(topics).map(([id, topic]) => [topic.title, topicUrl(id)]),
   body: `<div class="shell home">
     <div class="home-directory">
       <div class="hero-copy">
@@ -169,11 +236,12 @@ await page('index.html', {
         <p class="lede">Compare apps, features, and pricing for everyday Shopify tasks.</p>
       </div>
       <section id="directory" aria-labelledby="directory-title">
-        <div class="section-head"><h2 id="directory-title">Browse by task</h2><p>${count(tools.length)} across ${Object.keys(topics).length} topics</p></div>
+        <div class="section-head"><h2 id="directory-title">Browse by task</h2><p class="section-meta">${count(tools.length)} across ${Object.keys(topics).length} topics <a class="text-link" href="#faq">FAQ</a></p></div>
         <div class="category-grid topic-grid" id="tools">${topicCards}</div>
       </section>
       <img class="hero-image" src="/assets/return-mailer.webp" alt="" decoding="async" width="1200" height="961">
     </div>
+    ${questions('Questions about Commerce Shelf', homeQuestions)}
     ${newsletter}
   </div>`,
 });
@@ -184,16 +252,19 @@ for (const [id, topic] of Object.entries(topics)) {
     title: `Shopify ${topic.title.toLowerCase()} tools`,
     description: topic.description,
     active: 'directory',
+    trail: topicTrail(id),
+    list: toolListEntries(id === 'returns' ? Object.keys(categories).flatMap(toolsForCategory) : items),
     body: `<div class="shell inner topic-page">
-      <a class="crumb" href="/#directory">${chevron} All topics</a>
+      ${breadcrumbs(topicTrail(id))}
       <header class="inner-heading">
         <h1>${escape(topic.title)}</h1>
         <p class="lede">${escape(topic.description)}</p>
         ${icon(topic.symbol)}
       </header>
       ${topicNavigation(id)}
-      <div class="section-head listing-head"><h2>${count(items.length)} to compare</h2><p>Published prices in USD</p></div>
+      <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><a class="text-link" href="#faq">Common questions</a></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
+      ${questions('Common questions', topicQuestions[id])}
     </div>`,
   });
 }
@@ -204,15 +275,18 @@ for (const [id, category] of Object.entries(categories)) {
     title: `Shopify ${category.title.toLowerCase()}`,
     description: category.description,
     active: 'directory',
+    trail: categoryTrail(id),
+    list: toolListEntries(items),
     body: `<div class="shell inner topic-page">
-      <a class="crumb" href="${topicUrl('returns')}">${chevron} Returns &amp; exchanges</a>
+      ${breadcrumbs(categoryTrail(id))}
       <header class="inner-heading">
         <h1>${escape(category.title)}</h1>
         <p class="lede">${escape(category.description)}</p>
         ${icon(category.symbol)}
       </header>
-      <div class="section-head listing-head"><h2>${count(items.length)}</h2><p>Listed prices in USD</p></div>
+      <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><a class="text-link" href="#faq">Common questions</a></div>
       ${toolList(items, topics.returns.featureLabel)}
+      ${questions('Common questions', returnCategoryQuestions[id])}
     </div>`,
   });
 }
@@ -225,17 +299,26 @@ for (const tool of tools) {
   const parentUrl = category ? categoryUrl(tool.category) : topicUrl(topicId);
   const peers = category ? toolsForCategory(tool.category) : toolsForTopic(topicId);
   const related = peers.filter(peer => peer.id !== tool.id).slice(0, 3);
+  const trail = [...(category ? categoryTrail(tool.category) : topicTrail(topicId)), [tool.name, toolUrl(tool.id)]];
+  const source = [`${tool.name} on the Shopify App Store`, listingUrl(tool)];
+  const specific = toolQuestions[tool.id];
+  const appQuestions = [
+    ...(specific ? [[...specific, source]] : []),
+    [`How much does ${tool.name} cost?`, pricingAnswer(tool), source],
+  ];
   await page(`tools/${tool.id}/index.html`, {
     title: `${tool.name} for Shopify`,
     description: tool.summary,
     active: 'directory',
+    trail,
     body: `<article class="shell inner tool-page">
-      <a class="crumb" href="${parentUrl}">${chevron} ${escape(parent.title)}</a>
+      ${breadcrumbs(trail)}
       <div class="tool-overview">
         <header class="tool-heading">
           <div class="tool-mark">${icon(parent.symbol)}${tool.sponsored ? '<span class="badge">Sponsored</span>' : ''}</div>
           <h1>${escape(tool.name)}</h1>
           <p class="lede">${escape(tool.summary)}</p>
+          <a class="text-link app-questions-link" href="#faq">App questions</a>
         </header>
         <section class="tool-links" aria-labelledby="price-heading">
           <div class="tool-pricing">
@@ -266,6 +349,7 @@ for (const tool of tools) {
           ${chevron}
         </a></li>`).join('')}</ul>
       </section>` : ''}
+      ${questions('Questions about this app', appQuestions)}
     </article>`,
   });
 }
@@ -274,7 +358,9 @@ await page('sponsor/index.html', {
   title: 'Sponsor the directory',
   description: 'Apply for a labeled featured spot in the Commerce Shelf Shopify app directory.',
   active: 'sponsor',
+  trail: [...homeTrail, ['Sponsor', '/sponsor/']],
   body: `<div class="shell inner sponsor">
+    ${breadcrumbs([...homeTrail, ['Sponsor', '/sponsor/']])}
     <div class="sponsor-intro">
       <header>
         <h1>Get featured on Commerce Shelf.</h1>
@@ -314,8 +400,10 @@ await page('sponsor/index.html', {
           <li>Preferred start date</li>
         </ul>
         <p class="source-note">${stripe ? `<a class="text-link" href="${escape(application.href)}">Open the public application on GitHub</a>` : 'The application is a public GitHub issue.'}</p>
+        <p class="source-note"><a class="text-link" href="#faq">See sponsorship questions</a></p>
       </section>
     </div>
+    ${questions('Sponsorship questions', sponsorQuestions)}
   </div>`,
 });
 
