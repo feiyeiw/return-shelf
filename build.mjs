@@ -115,11 +115,11 @@ await page('index.html', {
   body: `<div class="shell home">
     <section class="hero">
       <div>
-        <h1>Shopify returns.<br>Better options.</h1>
+        <h1>Shopify returns<br>&amp; exchange tools</h1>
         <p class="lede">${positioning}</p>
       </div>
       <div class="return-label" aria-label="${count(tools.length)} across ${Object.keys(categories).length} categories">
-        <div class="label-line"><span>Shopify returns directory</span><span aria-hidden="true">↶</span></div>
+        <div class="label-line"><span>Tools for Shopify</span><span aria-hidden="true">↶</span></div>
         <div class="label-core"><strong>${tools.length}</strong><span>tools to<br>compare</span></div>
         <div class="label-barcode" aria-hidden="true"></div>
       </div>
