@@ -1,0 +1,13 @@
+{
+  "name": "return-shelf",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node build.mjs",
+    "dev": "npm run build && wrangler pages dev dist",
+    "deploy": "npm run build && wrangler pages deploy dist --project-name return-shelf --branch main"
+  },
+  "devDependencies": {
+    "wrangler": "4.166.0"
+  }
+}
