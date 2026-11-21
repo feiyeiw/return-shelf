@@ -1,6 +1,6 @@
-# Return Shelf
+# Commerce Shelf
 
-A small directory of Shopify tools for self-service returns, exchanges, and return shipping. The fifteen launch entries, public Shopify sources, and official vendor sites are in [directory.mjs](directory.mjs).
+An independent Shopify app directory with five topics. The returns listings are in [directory.mjs](directory.mjs). The topic descriptions and other listings are in [shopify.mjs](shopify.mjs). Each tool page links to its Shopify source and official website.
 
 ## Build and deploy
 
@@ -22,4 +22,4 @@ The form sends only the submitted email to the server-side Resend Contacts API. 
 
 ## Sponsorship
 
-The sponsor page opens a public GitHub issue template for applications. To activate checkout after approving an offer, supply a live Stripe Payment Link in `STRIPE_PAYMENT_LINK` at build time, then redeploy. No Stripe API key is required. Approved listings can be marked as sponsored in `directory.mjs`.
+The sponsor page opens a public GitHub issue template for applications. To activate checkout after approving an offer, supply a live Stripe Payment Link in `STRIPE_PAYMENT_LINK` at build time, then redeploy. No Stripe API key is required. Approved listings can be marked as sponsored in the corresponding listings file.

@@ -10,10 +10,10 @@ export const onRequest = async ({ request, env }) => {
 
   const origin = request.headers.get('Origin');
   if (origin && origin !== new URL(request.url).origin) {
-    return respond('Please use the subscription form on Return Shelf.', 403);
+    return respond('Please use the subscription form on Commerce Shelf.', 403);
   }
   if (!request.headers.get('Content-Type')?.startsWith('application/x-www-form-urlencoded')) {
-    return respond('Please use the subscription form on Return Shelf.', 415);
+    return respond('Please use the subscription form on Commerce Shelf.', 415);
   }
 
   const payload = await request.text();
@@ -39,13 +39,13 @@ export const onRequest = async ({ request, env }) => {
       method: 'POST',
       body: JSON.stringify({ email, segments: [{ id: segmentId }] }),
     });
-    if (created.ok) return respond('You’re subscribed to Return Shelf updates.');
+    if (created.ok) return respond('You’re subscribed to Commerce Shelf updates.');
     if (created.status === 409) {
       const added = await resend(
         `/contacts/${encodeURIComponent(email)}/segments/${encodeURIComponent(segmentId)}`,
         { method: 'POST' },
       );
-      if (added.ok) return respond('You’re subscribed to Return Shelf updates.');
+      if (added.ok) return respond('You’re subscribed to Commerce Shelf updates.');
     }
   } catch {
     return unavailable();

@@ -45,9 +45,9 @@ h2 { font-size: clamp(2.4rem, 4.6vw, 3.55rem); }
 .header-row { min-height: 4.6rem; }
 .brand { display: inline-flex; align-items: center; gap: .62rem; text-decoration: none; font-size: 1.12rem; font-weight: 700; letter-spacing: -.035em; white-space: nowrap; }
 .brand-mark { flex: none; width: 2rem; height: 2rem; background: url('./return-shelf.png') center / contain no-repeat; }
-nav { align-self: stretch; display: flex; align-items: stretch; gap: clamp(1.15rem, 3.3vw, 2.4rem); }
-nav a { display: flex; align-items: center; border-bottom: 2px solid transparent; text-decoration: none; color: var(--muted); font-weight: 600; font-size: .925rem; white-space: nowrap; }
-nav a:hover, nav a[aria-current] { border-bottom-color: var(--blue); color: var(--blue-dark); }
+.header-row nav { align-self: stretch; display: flex; align-items: stretch; gap: clamp(1.15rem, 3.3vw, 2.4rem); }
+.header-row nav a { display: flex; align-items: center; border-bottom: 2px solid transparent; text-decoration: none; color: var(--muted); font-weight: 600; font-size: .925rem; white-space: nowrap; }
+.header-row nav a:hover, .header-row nav a[aria-current] { border-bottom-color: var(--blue); color: var(--blue-dark); }
 
 .home { padding-block: clamp(2rem, 5vw, 3.75rem) clamp(3rem, 6vw, 5.7rem); }
 .hero { display: grid; grid-template-columns: 1fr 1.04fr; align-items: center; gap: clamp(2rem, 4.8vw, 4.4rem); }
@@ -61,7 +61,9 @@ nav a:hover, nav a[aria-current] { border-bottom-color: var(--blue); color: var(
 #directory { margin-block: clamp(3rem, 5.5vw, 4.2rem) 0; }
 .section-head { display: flex; align-items: baseline; justify-content: space-between; gap: .6rem 1.4rem; flex-wrap: wrap; margin-bottom: 1.3rem; }
 .section-head p { color: var(--muted); font-size: .9rem; }
-.category-grid { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: .8rem; background: var(--line); }
+.category-grid { display: grid; grid-template-columns: repeat(6, minmax(0, 1fr)); gap: 1px; overflow: hidden; border: 1px solid var(--line); border-radius: .8rem; background: var(--line); }
+.topic-grid .category-card { grid-column: span 2; }
+.topic-grid .category-card:nth-last-child(-n + 2) { grid-column: span 3; }
 .category-card { display: flex; flex-direction: column; align-items: flex-start; padding: clamp(1.15rem, 2.6vw, 1.65rem); background: var(--white); text-decoration: none; }
 .category-card:hover, .category-card:focus-visible { background: var(--lavender); }
 .category-card:focus-visible { outline-offset: -3px; }
@@ -81,8 +83,15 @@ nav a:hover, nav a[aria-current] { border-bottom-color: var(--blue); color: var(
 .icon--exchange i::after { left: 0; bottom: -24%; transform: rotate(225deg); }
 .icon--parcel i { inset: 26%; border: 1.5px solid; border-radius: .14rem; }
 .icon--parcel i::before { content: ''; position: absolute; left: 30%; right: 30%; height: 48%; border: 1.5px solid; border-top: none; }
+.icon--tracking i { inset: 23% 30% 36%; border: 1.5px solid; border-radius: 50% 50% 50% 0; transform: rotate(-45deg); }
+.icon--tracking i::before { content: ''; position: absolute; inset: 30%; border: 1.5px solid; border-radius: 50%; }
+.icon--clock i { inset: 23%; border: 1.5px solid; border-radius: 50%; }
+.icon--clock i::before { content: ''; position: absolute; inset: 18% 18% 45% 45%; border: 1.5px solid; border-top: 0; border-right: 0; }
+.icon--document i { inset: 21% 27%; border: 1.5px solid; border-radius: .15rem; }
+.icon--document i::before { content: ''; position: absolute; inset: 29% 22%; border-block: 1.5px solid; }
+.icon--store i { inset: 43% 26% 23%; border: 1.5px solid; border-radius: .12rem; }
+.icon--store i::before { content: ''; position: absolute; inset: -76% -18% auto; height: 66%; border: 1.5px solid; border-radius: .17rem; }
 
-.directory { margin-top: clamp(3rem, 6vw, 5.2rem); }
 .tool-group { display: grid; grid-template-columns: minmax(10rem, 1fr) minmax(0, 3fr); gap: 1.7rem; padding-block: .8rem 1rem; border-top: 1px solid var(--line); }
 .tool-group + .tool-group { margin-top: 1.2rem; }
 .group-heading { align-self: start; display: flex; align-items: center; gap: .68rem; padding-top: .55rem; }
@@ -126,6 +135,9 @@ input { flex: 1; min-width: 0; padding: .68rem .8rem; border: 1px solid #a49dbb;
 .inner h1 { max-width: 60rem; font-size: clamp(3rem, 6.7vw, 6.1rem); overflow-wrap: anywhere; }
 .inner-heading .lede { margin-top: .85rem; }
 .inner-heading .icon { position: absolute; top: clamp(1.55rem, 4.9vw, 3.65rem); right: clamp(1.55rem, 4.9vw, 3.65rem); width: clamp(3rem, 7vw, 5.1rem); height: auto; aspect-ratio: 1; background: var(--white); }
+.topic-nav { display: flex; flex-wrap: wrap; gap: .5rem; margin-top: 1.15rem; }
+.topic-nav a { padding: .38rem .65rem; border: 1px solid var(--line); border-radius: .4rem; background: var(--white); color: var(--muted); text-decoration: none; font-size: .875rem; font-weight: 600; }
+.topic-nav a:hover, .topic-nav a[aria-current] { border-color: var(--blue); color: var(--blue-dark); background: var(--lavender); }
 .listing-head { margin-top: 2.3rem; }
 .inner > .tool-list { border-block: 1px solid var(--line); }
 .profile-grid { display: grid; grid-template-columns: minmax(0, 1fr) minmax(15rem, .46fr); gap: clamp(1.2rem, 3.4vw, 3rem); align-items: start; margin-top: clamp(1.5rem, 4vw, 3rem); }
@@ -168,6 +180,7 @@ dd { color: var(--muted); margin: 0; }
 
 @media (max-width: 36rem) {
   .category-grid { grid-template-columns: 1fr; }
+  .topic-grid .category-card, .topic-grid .category-card:nth-last-child(-n + 2) { grid-column: auto; }
   .category-card { display: grid; grid-template-columns: 2.6rem 1fr .52rem; align-items: center; column-gap: .82rem; }
   .category-top { display: contents; }
   .category-top .icon { grid-area: 1 / 1; }
@@ -186,8 +199,8 @@ dd { color: var(--muted); margin: 0; }
 @media (max-width: 23rem) {
   .brand { font-size: 1rem; gap: .45rem; }
   .brand-mark { width: 1.75rem; height: 1.75rem; }
-  nav { gap: .8rem; }
-  nav a { font-size: .875rem; }
+  .header-row nav { gap: .8rem; }
+  .header-row nav a { font-size: .875rem; }
   .hero h1 { font-size: 3.25rem; }
   .form-row { flex-direction: column; }
   .details > div { grid-template-columns: 1fr; }
