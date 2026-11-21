@@ -3,13 +3,14 @@ import { categories, tools as returnTools, reviewed, listingUrl } from './direct
 import { topics, additionalTools } from './shopify.mjs';
 
 const siteName = 'Commerce Shelf';
+const siteUrl = 'https://commerceshelf.com';
 const positioning = 'Compare Shopify apps for returns, order tracking, preorders, invoices, and local delivery.';
 const tools = [...returnTools, ...additionalTools];
 const repository = 'https://github.com/feiyeiw/return-shelf';
 const application = new URL(repository + '/issues/new');
 application.search = new URLSearchParams({
   title: 'Featured placement application: ',
-  body: 'Tool name:\n\nOfficial website:\n\nBest fit for Shopify merchants:\n',
+  body: 'App name:\n\nShopify App Store URL:\n\nPreferred topic:\n\nBest fit for Shopify merchants:\n\nPreferred start date:\n',
 });
 const stripe = process.env.STRIPE_PAYMENT_LINK?.trim();
 if (stripe && !/^https:\/\/buy\.stripe\.com\/(?!test_)[A-Za-z0-9]+\/?$/.test(stripe)) {
@@ -30,7 +31,26 @@ const bySponsorship = (a, b) => Number(b.sponsored) - Number(a.sponsored);
 const toolsForCategory = id => returnTools.filter(tool => tool.category === id).sort(bySponsorship);
 const toolsForTopic = id => tools.filter(tool => topicOf(tool) === id).sort(bySponsorship);
 
-function layout({ title, description, body, active }) {
+function usd(amount) {
+  return `US$${amount.toLocaleString('en-US', { minimumFractionDigits: Number.isInteger(amount) ? 0 : 2 })}`;
+}
+
+function priceLabel(pricing, full = false) {
+  if (!pricing) return '<span class="price-main">Price unknown</span>';
+  const { from, to, free } = pricing;
+  const freeLabel = {
+    plan: 'Free plan available', install: 'Free to install', conditional: 'Free plan with conditions',
+  }[free];
+  const paidLabel = from === undefined ? 'Free'
+    : full && to > from ? `${usd(from)}–${usd(to)}/mo`
+    : full && to === from ? `${usd(from)}/mo`
+    : `From ${usd(from)}/mo`;
+  return `<span class="price-main">${paidLabel}</span>${freeLabel ? `<span class="price-note">${freeLabel}</span>` : ''}`;
+}
+
+const featureTags = tool => `<ul class="tags">${tool.tags.map(tag => `<li>${escape(tag)}</li>`).join('')}</ul>`;
+
+function layout({ title, description, body, active, canonical }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -38,8 +58,9 @@ function layout({ title, description, body, active }) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escape(title)} | ${siteName}</title>
   <meta name="description" content="${escape(description)}">
+  ${canonical ? `<link rel="canonical" href="${canonical}">` : ''}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=commerce">
+  <link rel="stylesheet" href="/assets/directory.css?v=compare">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -65,32 +86,35 @@ function layout({ title, description, body, active }) {
 </html>`;
 }
 
-function toolList(items) {
-  return `<ul class="tool-list">${items.map(tool => `
+function toolList(items, featureLabel) {
+  return `<div class="comparison">
+  <div class="comparison-labels" aria-hidden="true"><span>App</span><span>Best for</span><span>${escape(featureLabel)}</span><span>Price</span></div>
+  <ul class="tool-list">${items.map(tool => `
     <li>
       <a class="tool-row" href="${toolUrl(tool.id)}">
-        <div>
+        <div class="tool-identity">
           <span class="tool-name">${escape(tool.name)}</span>
           ${tool.sponsored ? '<span class="badge">Sponsored</span>' : ''}
-          <span class="tool-summary">${escape(tool.summary)}</span>
         </div>
-        <span class="tool-price">${escape(tool.price || 'Unknown')}</span>
+        <span class="tool-audience">${escape(tool.audience)}</span>
+        <span class="tool-features">${tool.tags.map(escape).join(' · ')}</span>
+        <span class="tool-price">${priceLabel(tool.pricing)}</span>
         ${chevron}
       </a>
-    </li>`).join('')}</ul>`;
+    </li>`).join('')}</ul></div>`;
 }
 
 const topicCards = Object.entries(topics).map(([id, topic]) => `
   <a class="category-card" href="${topicUrl(id)}">
     <span class="category-top">${icon(topic.symbol)}${chevron}</span>
     <span class="category-title">${escape(topic.title)}</span>
-    <span class="category-description">${escape(topic.description)}</span>
+    <span class="category-description">${escape(topic.task)}</span>
     <span class="category-count">${count(toolsForTopic(id).length)}</span>
   </a>`).join('');
 
 function topicNavigation(activeId) {
   return `<nav class="topic-nav" aria-label="Shopify topics">${Object.entries(topics).map(([id, topic]) =>
-    `<a href="${topicUrl(id)}"${activeId === id ? ' aria-current="page"' : ''}>${escape(topic.title)}</a>`,
+    `<a href="${topicUrl(id)}"${activeId === id ? ' aria-current="page"' : ''}>${escape(topic.navLabel)}</a>`,
   ).join('')}</nav>`;
 }
 
@@ -100,7 +124,7 @@ const returnGroups = Object.entries(categories).map(([id, category]) => `
       ${icon(category.symbol)}
       <h3><a href="${categoryUrl(id)}">${escape(category.title)}</a></h3>
     </div>
-    ${toolList(toolsForCategory(id))}
+    ${toolList(toolsForCategory(id), topics.returns.featureLabel)}
   </section>`).join('');
 
 const newsletter = `
@@ -122,10 +146,13 @@ const newsletter = `
 
 async function page(path, options) {
   const output = new URL(path, buildDirectory);
+  const canonical = path === '404.html' ? null : `${siteUrl}/${path.replace(/index\.html$/, '')}`;
+  if (canonical) sitemap.push(canonical);
   await mkdir(new URL('./', output), { recursive: true });
-  await writeFile(output, layout(options));
+  await writeFile(output, layout({ ...options, canonical }));
 }
 
+const sitemap = [];
 const buildDirectory = new URL('./dist/', import.meta.url);
 await rm(buildDirectory, { recursive: true, force: true });
 await mkdir(buildDirectory, { recursive: true });
@@ -136,18 +163,17 @@ await page('index.html', {
   description: positioning,
   active: 'directory',
   body: `<div class="shell home">
-    <section class="hero" aria-labelledby="page-title">
+    <div class="home-directory">
       <div class="hero-copy">
-        <h1 id="page-title">Shopify tools<br> by task.</h1>
-        <p class="lede">${positioning}</p>
-        <a class="button" href="#directory">Explore ${count(tools.length)}</a>
+        <h1>Shopify apps for<br> store operations.</h1>
+        <p class="lede">Compare apps, features, and pricing for everyday Shopify tasks.</p>
       </div>
-      <img class="hero-image" src="/assets/return-mailer.webp" alt="" fetchpriority="high" width="1200" height="961">
-    </section>
-    <section id="directory" aria-labelledby="directory-title">
-      <div class="section-head"><h2 id="directory-title">Browse by task</h2></div>
-      <div class="category-grid topic-grid" id="tools">${topicCards}</div>
-    </section>
+      <section id="directory" aria-labelledby="directory-title">
+        <div class="section-head"><h2 id="directory-title">Browse by task</h2><p>${count(tools.length)} across ${Object.keys(topics).length} topics</p></div>
+        <div class="category-grid topic-grid" id="tools">${topicCards}</div>
+      </section>
+      <img class="hero-image" src="/assets/return-mailer.webp" alt="" decoding="async" width="1200" height="961">
+    </div>
     ${newsletter}
   </div>`,
 });
@@ -158,7 +184,7 @@ for (const [id, topic] of Object.entries(topics)) {
     title: `Shopify ${topic.title.toLowerCase()} tools`,
     description: topic.description,
     active: 'directory',
-    body: `<div class="shell inner">
+    body: `<div class="shell inner topic-page">
       <a class="crumb" href="/#directory">${chevron} All topics</a>
       <header class="inner-heading">
         <h1>${escape(topic.title)}</h1>
@@ -166,8 +192,8 @@ for (const [id, topic] of Object.entries(topics)) {
         ${icon(topic.symbol)}
       </header>
       ${topicNavigation(id)}
-      <div class="section-head listing-head"><h2>${count(items.length)}</h2><p>Listed prices in USD</p></div>
-      ${id === 'returns' ? returnGroups : toolList(items)}
+      <div class="section-head listing-head"><h2>${count(items.length)} to compare</h2><p>Published prices in USD</p></div>
+      ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
     </div>`,
   });
 }
@@ -178,7 +204,7 @@ for (const [id, category] of Object.entries(categories)) {
     title: `Shopify ${category.title.toLowerCase()}`,
     description: category.description,
     active: 'directory',
-    body: `<div class="shell inner">
+    body: `<div class="shell inner topic-page">
       <a class="crumb" href="${topicUrl('returns')}">${chevron} Returns &amp; exchanges</a>
       <header class="inner-heading">
         <h1>${escape(category.title)}</h1>
@@ -186,7 +212,7 @@ for (const [id, category] of Object.entries(categories)) {
         ${icon(category.symbol)}
       </header>
       <div class="section-head listing-head"><h2>${count(items.length)}</h2><p>Listed prices in USD</p></div>
-      ${toolList(items)}
+      ${toolList(items, topics.returns.featureLabel)}
     </div>`,
   });
 }
@@ -201,26 +227,26 @@ for (const tool of tools) {
     title: `${tool.name} for Shopify`,
     description: tool.summary,
     active: 'directory',
-    body: `<article class="shell inner">
+    body: `<article class="shell inner tool-page">
       <a class="crumb" href="${parentUrl}">${chevron} ${escape(parent.title)}</a>
       <header class="inner-heading">
         <h1>${escape(tool.name)}</h1>
         <p class="lede">${escape(tool.summary)}</p>
         ${icon(parent.symbol)}
       </header>
-      <div class="profile-grid">
+      <section class="profile-grid tool-profile" aria-label="Tool details">
         <dl class="details">
           <div><dt>Best for</dt><dd>${escape(tool.audience)}</dd></div>
-          <div><dt>Tags</dt><dd><ul class="tags">${tool.tags.map(tag => `<li>${escape(tag)}</li>`).join('')}</ul></dd></div>
+          <div><dt>Key features</dt><dd>${featureTags(tool)}</dd></div>
+          <div><dt>Listed price</dt><dd class="tool-profile-price">${priceLabel(tool.pricing, true)}${tool.pricing?.note ? `<p class="source-note">${escape(tool.pricing.note)}</p>` : ''}</dd></div>
           <div><dt>Sponsored</dt><dd>${tool.sponsored ? 'Yes' : 'No'}</dd></div>
         </dl>
         <div class="action-panel">
-          <dl class="price-detail"><dt>Listed price (USD)</dt><dd>${escape(tool.price || 'Unknown')}</dd></dl>
           <a class="button" href="${escape(tool.website)}">Official website</a>
           <a class="text-link" href="${escape(listingUrl(tool))}">Shopify App Store source</a>
+          <p class="source-note">Pricing checked <time datetime="${reviewed}">November 21, 2026</time>. Usage and carrier fees may apply.</p>
         </div>
-      </div>
-      <p class="source-note">Checked against the Shopify listing on <time datetime="${reviewed}">November 21, 2026</time>. Usage and carrier fees may apply.</p>
+      </section>
     </article>`,
   });
 }
@@ -236,13 +262,16 @@ await page('sponsor/index.html', {
     </header>
     <div class="profile-grid">
       <dl class="details">
-        <div><dt>Placement</dt><dd>Your listing can appear at the top of a relevant list for the agreed period.</dd></div>
+        <div><dt>Placement</dt><dd>Your app appears at the top of a relevant topic list. On the returns topic, it appears at the top of the relevant subcategory.</dd></div>
+        <div><dt>Duration</dt><dd>Request a 30-day placement. We confirm the start date and pricing after review.</dd></div>
         <div><dt>Disclosure</dt><dd>Featured listings carry a Sponsored label in the directory and on the tool page.</dd></div>
         <div><dt>Eligibility</dt><dd>Live Shopify apps that fit one of the directory’s current topics.</dd></div>
       </dl>
       <div class="action-panel">
+        <h2>Application details</h2>
+        <p>Include your app name, Shopify App Store URL, preferred topic, the merchants you serve, and your preferred start date.</p>
         <a class="button" href="${escape(stripe || application.href)}">${stripe ? 'Pay with Stripe' : 'Apply for placement'}</a>
-        ${stripe ? '' : '<p>Applications are public on GitHub. Include your tool name, official website, and where it fits.</p>'}
+        ${stripe ? '' : '<p>Applications are public on GitHub.</p>'}
       </div>
     </div>
   </div>`,
@@ -253,3 +282,6 @@ await page('404.html', {
   description: 'Find Shopify apps for your store in the Commerce Shelf directory.',
   body: '<div class="shell inner"><h1>Page not found</h1><p><a href="/#directory">Browse the directory</a></p></div>',
 });
+
+await writeFile(new URL('sitemap.xml', buildDirectory), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemap.map(url => `  <url><loc>${url}</loc></url>`).join('\n')}\n</urlset>\n`);
+await writeFile(new URL('robots.txt', buildDirectory), `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`);
