@@ -2,11 +2,15 @@ import { cp, mkdir, rm, writeFile } from 'node:fs/promises';
 import { categories, tools as returnTools, reviewed, listingUrl } from './directory.mjs';
 import { topics, additionalTools } from './shopify.mjs';
 import { homeQuestions, topicQuestions, returnCategoryQuestions, toolQuestions, sponsorQuestions } from './faq.mjs';
+import { topicGuides } from './guides.mjs';
 
 const siteName = 'Commerce Shelf';
 const siteUrl = 'https://commerceshelf.com';
+const siteImage = `${siteUrl}/assets/return-mailer.webp`;
+const indexNowKey = 'e146404062026c593e3ebf2989bb9a21';
 const positioning = 'Compare Shopify apps for returns, order tracking, preorders, invoices, and local delivery.';
 const tools = [...returnTools, ...additionalTools];
+const toolsById = new Map(tools.map(tool => [tool.id, tool]));
 const repository = 'https://github.com/feiyeiw/return-shelf';
 const application = new URL(repository + '/issues/new');
 application.search = new URLSearchParams({
@@ -92,12 +96,20 @@ function breadcrumbs(trail) {
 
 function structuredData({ title, description, canonical, list, trail }) {
   if (!canonical) return '';
-  const website = { '@type': 'WebSite', '@id': `${siteUrl}/#website`, name: siteName, url: `${siteUrl}/` };
-  const webPage = {
-    '@type': list ? 'CollectionPage' : 'WebPage', '@id': canonical, url: canonical,
-    name: title, description, inLanguage: 'en', isPartOf: { '@id': website['@id'] },
+  const publisher = {
+    '@type': 'Organization', '@id': `${siteUrl}/#publisher`, name: siteName,
+    url: `${siteUrl}/`, logo: `${siteUrl}/assets/return-shelf.png`,
   };
-  const graph = [website, webPage];
+  const website = {
+    '@type': 'WebSite', '@id': `${siteUrl}/#website`, name: siteName,
+    url: `${siteUrl}/`, publisher: { '@id': publisher['@id'] },
+  };
+  const webPage = {
+    '@type': list ? 'CollectionPage' : canonical.endsWith('/methodology/') ? 'AboutPage' : 'WebPage', '@id': canonical, url: canonical,
+    name: title, description, inLanguage: 'en', isPartOf: { '@id': website['@id'] },
+    publisher: { '@id': publisher['@id'] },
+  };
+  const graph = [publisher, website, webPage];
   const listItems = entries => entries.map(([name, path], index) => ({ '@type': 'ListItem', position: index + 1, name, item: new URL(path, siteUrl).href }));
   if (trail) {
     const breadcrumbId = `${canonical}#breadcrumb`;
@@ -123,10 +135,18 @@ function layout({ title, description, body, active, canonical, list, trail }) {
   <meta name="viewport" content="width=device-width, initial-scale=1">
   <title>${escape(title)} | ${siteName}</title>
   <meta name="description" content="${escape(description)}">
-  ${canonical ? `<link rel="canonical" href="${canonical}">` : ''}
+  ${canonical ? `<link rel="canonical" href="${canonical}">
+  <meta property="og:type" content="website">
+  <meta property="og:site_name" content="${siteName}">
+  <meta property="og:title" content="${escape(title)} | ${siteName}">
+  <meta property="og:description" content="${escape(description)}">
+  <meta property="og:url" content="${canonical}">
+  <meta property="og:image" content="${siteImage}">
+  <meta property="og:image:alt" content="An open blue shipping box with a return label">
+  <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, trail })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=questions">
+  <link rel="stylesheet" href="/assets/directory.css?v=guides">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -145,6 +165,7 @@ function layout({ title, description, body, active, canonical, list, trail }) {
     <div class="shell footer-row">
       <span class="footer-brand">${siteName}</span>
       <span>Independent Shopify app directory</span>
+      <a href="/methodology/">How we compare apps</a>
       <a href="/#subscribe">Subscribe</a>
     </div>
   </footer>
@@ -182,6 +203,23 @@ function topicNavigation(activeId) {
   return `<nav class="topic-nav" aria-label="Shopify topics">${Object.entries(topics).map(([id, topic]) =>
     `<a href="${topicUrl(id)}"${activeId === id ? ' aria-current="page"' : ''}>${escape(topic.navLabel)}</a>`,
   ).join('')}</nav>`;
+}
+
+function buyingGuide(guide) {
+  return `<section class="buying-guide" id="guide" aria-labelledby="guide-heading">
+    <h2 id="guide-heading">How to choose</h2>
+    <p class="guide-summary">${escape(guide.summary)}</p>
+    <ul class="guide-examples">${guide.examples.map(([task, id, advice]) => {
+      const tool = toolsById.get(id);
+      return `<li>
+        <h3>${escape(task)}</h3>
+        <p>${escape(advice)}</p>
+        <a class="text-link" href="${toolUrl(id)}">${escape(tool.name)}</a>
+      </li>`;
+    }).join('')}</ul>
+    <div class="guide-check"><h3>Before you install</h3><p>${escape(guide.check)}</p></div>
+    <a class="text-link guide-method" href="/methodology/">How Commerce Shelf compares apps</a>
+  </section>`;
 }
 
 const returnGroups = Object.entries(categories).map(([id, category]) => `
@@ -248,9 +286,10 @@ await page('index.html', {
 
 for (const [id, topic] of Object.entries(topics)) {
   const items = toolsForTopic(id);
+  const guide = topicGuides[id];
   await page(`shopify/${id}/index.html`, {
-    title: `Shopify ${topic.title.toLowerCase()} tools`,
-    description: topic.description,
+    title: guide.title,
+    description: guide.description,
     active: 'directory',
     trail: topicTrail(id),
     list: toolListEntries(id === 'returns' ? Object.keys(categories).flatMap(toolsForCategory) : items),
@@ -262,8 +301,9 @@ for (const [id, topic] of Object.entries(topics)) {
         ${icon(topic.symbol)}
       </header>
       ${topicNavigation(id)}
-      <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><a class="text-link" href="#faq">Common questions</a></div>
+      <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
+      ${buyingGuide(guide)}
       ${questions('Common questions', topicQuestions[id])}
     </div>`,
   });
@@ -407,6 +447,37 @@ await page('sponsor/index.html', {
   </div>`,
 });
 
+const methodologyTrail = [...homeTrail, ['How we compare apps', '/methodology/']];
+await page('methodology/index.html', {
+  title: 'How We Compare Shopify Apps',
+  description: 'How Commerce Shelf selects Shopify apps, checks published pricing, writes buying guides, and labels sponsored placements.',
+  trail: methodologyTrail,
+  body: `<article class="shell inner methodology">
+    ${breadcrumbs(methodologyTrail)}
+    <header>
+      <h1>How we compare Shopify apps</h1>
+      <p class="lede">Commerce Shelf is an independent directory organized around tasks Shopify merchants handle in their stores.</p>
+    </header>
+    <section>
+      <h2>How apps are selected</h2>
+      <p>Each app belongs to a topic based on the workflow it supports. Tool profiles link to the Shopify App Store listing and the vendor’s official site. The “Best for” field describes how the app’s published features fit a merchant’s task.</p>
+    </section>
+    <section>
+      <h2>What the guides compare</h2>
+      <p>Each buying guide pairs specific tasks with examples from the directory and gives merchants a workflow to test in their own store. The comparisons are based on public documentation. Actual results depend on the app plan, Shopify setup, and the store’s workflow.</p>
+    </section>
+    <section>
+      <h2>How to read pricing</h2>
+      <p>Prices are published in US dollars, and each app page shows when its listing was checked. Free plans, free installation, and free offers with eligibility conditions are labeled separately. Check the vendor’s listing for usage thresholds, extra fees, and plan details.</p>
+    </section>
+    <section>
+      <h2>How sponsorship is labeled</h2>
+      <p>A paid placement appears at the top of the relevant topic list or returns subcategory. It is labeled Sponsored in the list and on the app page. <a class="text-link" href="/sponsor/">Read the placement terms</a>.</p>
+    </section>
+    <a class="button" href="/#directory">Browse the directory</a>
+  </article>`,
+});
+
 await page('404.html', {
   title: 'Page not found',
   description: 'Find Shopify apps for your store in the Commerce Shelf directory.',
@@ -415,3 +486,4 @@ await page('404.html', {
 
 await writeFile(new URL('sitemap.xml', buildDirectory), `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n${sitemap.map(url => `  <url><loc>${url}</loc></url>`).join('\n')}\n</urlset>\n`);
 await writeFile(new URL('robots.txt', buildDirectory), `User-agent: *\nAllow: /\n\nSitemap: ${siteUrl}/sitemap.xml\n`);
+await writeFile(new URL(`${indexNowKey}.txt`, buildDirectory), indexNowKey);

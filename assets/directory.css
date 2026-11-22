@@ -222,6 +222,22 @@ dd { color: var(--muted); margin: 0; }
 .faq-answer p { max-width: 72ch; margin-top: .4rem; color: var(--muted); }
 .faq-answer .faq-source { margin-top: .48rem; font-size: .875rem; }
 
+.buying-guide { margin-top: clamp(2.4rem, 5.5vw, 4.8rem); scroll-margin-top: 1rem; }
+.buying-guide h2, .methodology h2 { font-size: clamp(2.05rem, 4vw, 3.1rem); }
+.guide-summary, .guide-check p, .methodology section p { max-width: 72ch; margin-top: .6rem; color: var(--muted); }
+.guide-examples { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1px; overflow: hidden; margin: 1.1rem 0 0; padding: 0; border: 1px solid var(--line); border-radius: .75rem; background: var(--line); list-style: none; }
+.guide-examples li { display: flex; flex-direction: column; align-items: flex-start; gap: .6rem; padding: 1rem 1.15rem; background: var(--white); }
+.guide-examples h3, .guide-check h3 { font-size: 1.025rem; line-height: 1.35; }
+.guide-examples p { color: var(--muted); }
+.guide-examples a { margin-top: auto; font-size: .94rem; }
+.guide-check { margin-top: .9rem; padding: .9rem 1.15rem; border-radius: .75rem; background: var(--lavender); }
+.guide-check p { margin-top: .3rem; }
+.guide-method { display: inline-block; margin-top: .75rem; font-size: .94rem; }
+.methodology header { max-width: 54rem; }
+.methodology header .lede { margin-top: 1rem; }
+.methodology section { max-width: 50rem; margin-top: clamp(1.65rem, 4vw, 2.75rem); padding-top: 1rem; border-top: 1px solid var(--line); }
+.methodology > .button { margin-top: 1.6rem; }
+
 @media (max-width: 60rem) {
   .shell { width: calc(100% - 3rem); }
   .topic-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -249,6 +265,7 @@ dd { color: var(--muted); margin: 0; }
   .tool-overview { grid-template-columns: 1fr; grid-template-areas: 'heading' 'pricing' 'facts'; }
   .tool-heading h1, .sponsor h1 { font-size: clamp(2.75rem, 9vw, 4.55rem); }
   .related-tools { grid-template-columns: 1fr; }
+  .guide-examples { grid-template-columns: 1fr; }
   .faq { grid-template-columns: 1fr; }
   .faq h2 { max-width: none; }
 }
