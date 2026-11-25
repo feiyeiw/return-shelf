@@ -221,10 +221,10 @@ dd { color: var(--muted); margin: 0; }
 .service-price { margin-top: .55rem; color: var(--muted); font-size: .94rem; }
 .service-price strong { color: var(--blue-dark); font-size: 1.15rem; }
 .service-page .sponsor-information { margin-top: clamp(1.55rem, 4vw, 3rem); }
-.service-page ul { margin: 0 0 .95rem; padding-left: 1.25rem; }
+.service-page ul, .service-page ol { margin: 0 0 .95rem; padding-left: 1.25rem; }
 .service-page li + li { margin-top: .45rem; }
+.service-workflow-heading { margin-top: 1.6rem; }
 .service-page .text-link, .service-request .button { display: inline-flex; margin-top: .85rem; }
-.service-request .service-price { margin: -.3rem 0 .6rem; }
 .article-related .service-guide-link { margin-top: .8rem; }
 
 .faq { display: grid; grid-template-columns: minmax(11rem, .42fr) minmax(0, 1fr); gap: clamp(1rem, 3.4vw, 3rem); margin-top: clamp(2.3rem, 5.5vw, 4.9rem); padding-top: clamp(1rem, 2.6vw, 1.9rem); border-top: 1px solid var(--line); scroll-margin-top: 1rem; }

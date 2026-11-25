@@ -3,15 +3,20 @@ export const serviceRequestUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfLIh
 export const services = {
   tracking: {
     slug: 'order-tracking-setup',
-    title: 'Shopify order tracking setup',
-    pilotPrice: 59,
-    summary: 'We set up a branded tracking page for your store and connect it to your menu and shipping emails.',
+    title: 'Add a Track Your Order page to Shopify',
+    pilotPrice: 29,
+    summary: 'We put a tracking page with your logo on your store, link it from your menu and one shipping email, and show you that both links work on a phone.',
     deliverables: [
-      'Review your carriers and confirm the tracking app that fits your store.',
-      'Set up the branded page, the storefront menu link, and supported shipping email links.',
-      'Test a pending shipment, a split order, and a delivery exception with examples available in your setup.',
+      'A live Track Your Order page with your logo.',
+      'A store menu link and a link in one compatible shipping notification email.',
+      'The live page URL, a list of changes, and screenshots showing both links opening the page on mobile and the result of one test lookup.',
     ],
-    scope: 'One Shopify store and one compatible tracking app. We confirm compatibility before scheduling. Any app subscription is billed separately by the app provider.',
+    scope: 'The pilot covers one Shopify store and one compatible tracking app.',
+    workflow: [
+      'Send your store URL and tell us which carrier or fulfillment service you use.',
+      'Approve the setup and grant Shopify collaborator access, or join a screen share to make the changes with us.',
+      'Provide an order for testing. Open the page from the store menu and a test shipping email, and check that it shows the expected shipment status.',
+    ],
   },
   invoices: {
     slug: 'packing-slip-setup',

@@ -159,7 +159,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=setup-price">
+  <link rel="stylesheet" href="/assets/directory.css?v=setup-handoff">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -325,7 +325,7 @@ for (const [id, topic] of Object.entries(topics)) {
           <p class="service-summary">${escape(service.summary)}</p>
           ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price${id === 'tracking' ? ' · app subscription separate' : ''}</p>` : ''}
         </div>
-        <a class="button" href="${serviceUrl(service)}">Request setup</a>
+        <a class="button" href="${serviceUrl(service)}">${service.workflow ? 'See what you get' : 'Request setup'}</a>
       </section>` : ''}
       <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
@@ -346,19 +346,21 @@ for (const [topicId, service] of Object.entries(services)) {
       <header class="inner-heading">
         <h1>${escape(service.title)}</h1>
         <p class="lede">${escape(service.summary)}</p>
+        ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price · app subscription separate</p>` : ''}
       </header>
       <div class="sponsor-information">
         <section aria-labelledby="service-details">
-          <h2 id="service-details">What we set up</h2>
+          <h2 id="service-details">${service.workflow ? 'What you get' : 'What we set up'}</h2>
           <ul>${service.deliverables.map(item => `<li>${escape(item)}</li>`).join('')}</ul>
           <p>${escape(service.scope)}</p>
-          <a class="text-link" href="${articleUrl(articles[topicId])}">Read the setup guide</a>
+          ${service.workflow ? `<h2 class="service-workflow-heading">How it works</h2>
+          <ol>${service.workflow.map(step => `<li>${escape(step)}</li>`).join('')}</ol>` : ''}
+          <a class="text-link" href="${articleUrl(articles[topicId])}">${service.workflow ? 'Set it up yourself with the free guide' : 'Read the setup guide'}</a>
         </section>
         <section class="application-panel service-request" aria-labelledby="quote-title">
           <h2 id="quote-title">${service.pilotPrice ? 'Request setup' : 'Request a quote'}</h2>
-          ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price</p>` : ''}
-          <p>Share your store link, email, and what you want set up. ${service.pilotPrice ? 'We’ll confirm the setup and next steps by email.' : 'We’ll reply with the scope and price.'}</p>
-          <a class="button" href="${escape(serviceRequestUrl)}">Open the request form</a>
+          <p>Share your store link, email, and what you want set up. ${service.pilotPrice ? 'We’ll confirm compatibility and any app fees before starting.' : 'We’ll reply with the scope and price.'}</p>
+          <a class="button" href="${escape(serviceRequestUrl)}">${service.workflow ? 'Send your store details' : 'Open the request form'}</a>
         </section>
       </div>
     </div>`,
