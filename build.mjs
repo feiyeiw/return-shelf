@@ -341,7 +341,38 @@ for (const [topicId, service] of Object.entries(services)) {
     title: service.title,
     description: service.summary,
     trail,
-    body: `<div class="shell inner service-page">
+    body: topicId === 'invoices' ? `<div class="shell inner packing-preview">
+      ${breadcrumbs(trail)}
+      <div class="packing-hero">
+        <header class="inner-heading">
+          <h1>${escape(service.title)}</h1>
+          <p class="lede">${escape(service.summary)}</p>
+          <div class="packing-price"><strong>${usd(19)}</strong><span>Proposed one-time price</span></div>
+          <p class="packing-scope">One Shopify store, one template, one paper size.</p>
+          <a class="button" href="#delivery">See what you get</a>
+        </header>
+        <figure class="packing-sample">
+          <div class="packing-sheet">
+            <div class="packing-sheet-header"><strong>Harbor Goods</strong><span>Order #1042</span></div>
+            <p class="packing-sheet-title">Packing slip</p>
+            <table>
+              <thead><tr><th scope="col">Item</th><th scope="col">SKU</th><th scope="col">In this box</th></tr></thead>
+              <tbody><tr><td>Cotton tee<br><span>Navy / M</span></td><td>TEE-NV-M</td><td>2</td></tr></tbody>
+            </table>
+          </div>
+          <figcaption>Sample split shipment. This box contains 2 of the 3 tees ordered.</figcaption>
+        </figure>
+      </div>
+      <section class="packing-delivery" id="delivery" aria-labelledby="delivery-title">
+        <h2 id="delivery-title">What you get</h2>
+        <ol>
+          <li><h3>Two PDFs to check</h3><p>Send us your logo, the fields you want, and your paper size. We send you sample PDFs for a full shipment and a split shipment.</p></li>
+          <li><h3>A template installed in Shopify</h3><p>Once you approve the samples, we set up the template as your store’s default packing slip.</p></li>
+          <li><h3>Printing instructions for your team</h3><p>Print one slip or a batch from Shopify Orders. Shopify fills in the shipment contents each time.</p></li>
+        </ol>
+        <a class="text-link" href="https://commerceshelf.com/services/packing-slip-setup/">View the current service and request a quote</a>
+      </section>
+    </div>` : `<div class="shell inner service-page">
       ${breadcrumbs(trail)}
       <header class="inner-heading">
         <h1>${escape(service.title)}</h1>

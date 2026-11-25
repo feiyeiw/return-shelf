@@ -40,8 +40,8 @@ export const services = {
   },
   invoices: {
     slug: 'packing-slip-setup',
-    title: 'Shopify packing slip template setup',
-    summary: 'We customize your Shopify packing slip and check how it prints for single orders and packing batches.',
+    title: 'Custom Shopify packing slip',
+    summary: 'We set up the piece of paper that goes in each box, with your logo and a list of what’s in that shipment. Your team prints it straight from Shopify Orders.',
     deliverables: [
       'Customize one default Shopify packing slip with your logo, order reference, SKUs, and quantities.',
       'Verify that a split shipment shows the items and quantities packed in that shipment.',

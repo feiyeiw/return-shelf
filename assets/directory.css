@@ -234,6 +234,30 @@ dd { color: var(--muted); margin: 0; }
 .service-request h2 { scroll-margin-top: 1.5rem; }
 .article-related .service-guide-link { margin-top: .8rem; }
 
+.packing-hero { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, .9fr); gap: clamp(1.4rem, 5vw, 4rem); align-items: center; }
+.packing-hero .inner-heading { padding: 0; border: 0; background: transparent; }
+.packing-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .7rem; margin-top: 1.25rem; }
+.packing-price strong { font-size: clamp(1.65rem, 3vw, 2.2rem); color: var(--blue-dark); }
+.packing-price span, .packing-scope { color: var(--muted); }
+.packing-preview .button { margin-top: 1rem; }
+.packing-sample { margin: 0; padding: clamp(.9rem, 3vw, 2rem); background: var(--lavender); border-radius: .8rem; }
+.packing-sheet { padding: clamp(.75rem, 2.4vw, 1.5rem); border: 1px solid var(--line); background: var(--white); }
+.packing-sheet-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem .75rem; }
+.packing-sheet-header strong { font-family: var(--display); font-size: clamp(1.4rem, 3vw, 2rem); font-weight: 400; }
+.packing-sheet-title { margin-block: .8rem .45rem; font-weight: 700; }
+.packing-sheet table { width: 100%; border-collapse: collapse; font-size: clamp(.73rem, 1.2vw, .9rem); }
+.packing-sheet th, .packing-sheet td { padding: .42rem .15rem; text-align: left; border-top: 1px solid var(--line); vertical-align: top; }
+.packing-sheet th:last-child, .packing-sheet td:last-child { text-align: right; white-space: nowrap; }
+.packing-sheet td span, .packing-sample figcaption { color: var(--muted); }
+.packing-sample figcaption { margin-top: .75rem; font-size: .84rem; }
+.packing-delivery { margin-top: clamp(2.5rem, 6vw, 4.8rem); padding-top: 1.35rem; border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
+.packing-delivery ol { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 1.25rem 2rem; padding-left: 1.2rem; margin-block: 1.1rem; }
+.packing-delivery li::marker { color: var(--blue-dark); font-weight: 700; }
+.packing-delivery li p { color: var(--muted); margin-top: .35rem; }
+@media (max-width: 47rem) {
+  .packing-hero, .packing-delivery ol { grid-template-columns: 1fr; }
+}
+
 .faq { display: grid; grid-template-columns: minmax(11rem, .42fr) minmax(0, 1fr); gap: clamp(1rem, 3.4vw, 3rem); margin-top: clamp(2.3rem, 5.5vw, 4.9rem); padding-top: clamp(1rem, 2.6vw, 1.9rem); border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
 .faq h2 { max-width: 13ch; font-size: clamp(2.15rem, 4.4vw, 3.35rem); }
 .faq-answer { padding-block: .85rem; scroll-margin-top: 1rem; }
