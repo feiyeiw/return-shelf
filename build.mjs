@@ -10,7 +10,7 @@ const siteName = 'Commerce Shelf';
 const siteUrl = 'https://commerceshelf.com';
 const siteImage = `${siteUrl}/assets/return-mailer.webp`;
 const indexNowKey = 'e146404062026c593e3ebf2989bb9a21';
-const positioning = 'Compare Shopify apps for returns, order tracking, preorders, invoices, and local delivery.';
+const positioning = 'Compare tools for returns, order tracking, preorders, invoices, and local delivery. Get hands-on setup for tracking pages and packing slips.';
 const tools = [...returnTools, ...additionalTools];
 const toolsById = new Map(tools.map(tool => [tool.id, tool]));
 const repository = 'https://github.com/feiyeiw/return-shelf';
@@ -42,6 +42,7 @@ const toolsForTopic = id => tools.filter(tool => topicOf(tool) === id).sort(bySp
 const homeTrail = [['Home', '/']];
 const topicTrail = id => [...homeTrail, [topics[id].title, topicUrl(id)]];
 const categoryTrail = id => [...topicTrail('returns'), [categories[id].title, categoryUrl(id)]];
+const checkoutNote = 'Enter your store details at Payhip checkout before you pay. We’ll use your checkout email to confirm the setup.';
 
 function usd(amount) {
   return `US$${amount.toLocaleString('en-US', { minimumFractionDigits: Number.isInteger(amount) ? 0 : 2 })}`;
@@ -139,6 +140,14 @@ function structuredData({ title, description, canonical, list, listAnchor = 'com
 }
 
 const toolListEntries = items => items.map(tool => [tool.name, toolUrl(tool.id)]);
+const topicEntries = Object.fromEntries(Object.keys(topics).map(id => {
+  const service = services[id];
+  const apps = id === 'returns' ? Object.keys(categories).flatMap(toolsForCategory) : toolsForTopic(id);
+  const entries = toolListEntries(apps);
+  if (service) entries.unshift([service.title, serviceUrl(service)]);
+  return [id, entries];
+}));
+const toolCount = Object.values(topicEntries).reduce((total, entries) => total + entries.length, 0);
 
 function layout({ title, description, body, active, canonical, list, listAnchor, trail, published }) {
   return `<!doctype html>
@@ -159,7 +168,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=packing-slip-setup">
+  <link rel="stylesheet" href="/assets/directory.css?v=service-checkout">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -178,7 +187,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <footer class="site-footer">
     <div class="shell footer-row">
       <span class="footer-brand">${siteName}</span>
-      <span>Independent Shopify app directory</span>
+      <span>Independent Shopify tool directory</span>
       <a href="/methodology/">How we compare apps</a>
       <a href="/#subscribe">Subscribe</a>
     </div>
@@ -210,7 +219,7 @@ const topicCards = Object.entries(topics).map(([id, topic]) => `
     <span class="category-top">${icon(topic.symbol)}${chevron}</span>
     <span class="category-title">${escape(topic.title)}</span>
     <span class="category-description">${escape(topic.task)}</span>
-    <span class="category-count">${count(toolsForTopic(id).length)}</span>
+    <span class="category-count">${count(topicEntries[id].length)}</span>
   </a>`).join('');
 
 function topicNavigation(activeId) {
@@ -278,7 +287,7 @@ await mkdir(buildDirectory, { recursive: true });
 await cp(new URL('./assets/', import.meta.url), new URL('./assets/', buildDirectory), { recursive: true });
 
 await page('index.html', {
-  title: 'Shopify app directory by task',
+  title: 'Shopify tools by task',
   description: positioning,
   active: 'directory',
   list: Object.entries(topics).map(([id, topic]) => [topic.title, topicUrl(id)]),
@@ -286,11 +295,11 @@ await page('index.html', {
   body: `<div class="shell home">
     <div class="home-directory">
       <div class="hero-copy">
-        <h1>Shopify apps for<br> store operations.</h1>
-        <p class="lede">Compare apps, features, and pricing for everyday Shopify tasks.</p>
+        <h1>Shopify tools for<br> store operations.</h1>
+        <p class="lede">Compare apps and find setup services for everyday Shopify tasks.</p>
       </div>
       <section id="directory" aria-labelledby="directory-title">
-        <div class="section-head"><h2 id="directory-title">Browse by task</h2><p class="section-meta">${count(tools.length)} across ${Object.keys(topics).length} topics <a class="text-link" href="#faq">FAQ</a></p></div>
+        <div class="section-head"><h2 id="directory-title">Browse by task</h2><p class="section-meta">${count(toolCount)} across ${Object.keys(topics).length} topics <a class="text-link" href="#faq">FAQ</a></p></div>
         <div class="category-grid topic-grid" id="tools">${topicCards}</div>
       </section>
       <img class="hero-image" src="/assets/return-mailer.webp" alt="" decoding="async" width="1200" height="961">
@@ -309,7 +318,7 @@ for (const [id, topic] of Object.entries(topics)) {
     description: guide.description,
     active: 'directory',
     trail: topicTrail(id),
-    list: toolListEntries(id === 'returns' ? Object.keys(categories).flatMap(toolsForCategory) : items),
+    list: topicEntries[id],
     body: `<div class="shell inner topic-page">
       ${breadcrumbs(topicTrail(id))}
       <header class="inner-heading">
@@ -318,6 +327,7 @@ for (const [id, topic] of Object.entries(topics)) {
         ${icon(topic.symbol)}
       </header>
       ${topicNavigation(id)}
+      <div class="section-head listing-head" id="compare"><h2>${count(topicEntries[id].length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${service ? `<section class="service-offer" aria-labelledby="service-offer-title">
         <div>
           <p class="service-provider">Setup by Commerce Shelf</p>
@@ -327,7 +337,6 @@ for (const [id, topic] of Object.entries(topics)) {
         </div>
         <a class="button" href="${serviceUrl(service)}">See what you get</a>
       </section>` : ''}
-      <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
       ${buyingGuide(guide, articles[id])}
       ${questions('Common questions', topicQuestions[id])}
@@ -350,6 +359,7 @@ for (const [topicId, service] of Object.entries(services)) {
           <div class="packing-price"><strong>${usd(service.price)}</strong><span>One-time payment</span></div>
           <p class="packing-scope">${escape(service.scope)}</p>
           <a class="button" href="${escape(service.checkoutUrl || serviceRequestUrl)}">${service.checkoutUrl ? `Pay ${usd(service.price)} with PayPal` : 'Request setup'}</a>
+          <p class="service-payment-note">${service.checkoutUrl ? checkoutNote : 'Enter your store URL, paper size, and preferred fields when you request setup. We’ll confirm the details before arranging payment.'}</p>
         </header>
         <figure class="packing-sample">
           <div class="packing-sheet">
@@ -366,15 +376,10 @@ for (const [topicId, service] of Object.entries(services)) {
       <section class="packing-delivery" id="delivery" aria-labelledby="delivery-title">
         <h2 id="delivery-title">What you get</h2>
         <ol>
-          <li><h3>Two PDFs to check</h3><p>Send us your logo, the fields you want, and your paper size. We send you sample PDFs for a full shipment and a split shipment.</p></li>
+          <li><h3>Two PDFs to check</h3><p>We use your paper size and preferred fields to prepare sample PDFs for a full shipment and a split shipment.</p></li>
           <li><h3>A template installed in Shopify</h3><p>Once you approve the samples, we set up the template as your store’s default packing slip.</p></li>
           <li><h3>Printing instructions for your team</h3><p>Print one slip or a batch from Shopify Orders. Shopify fills in the shipment contents each time.</p></li>
         </ol>
-        ${service.checkoutUrl ? `<div id="after-payment" class="service-payment-note">
-          <h3>After paying</h3>
-          <p>Checkout is through Tool &amp; Page on Payhip. Download the setup guide from your Payhip confirmation, then use your purchase email and Payhip receipt reference to submit your store details.</p>
-          <a class="text-link" href="${escape(serviceRequestUrl)}">Open private setup form</a>
-        </div>` : `<p class="service-payment-note">Send your store URL, paper size, and preferred fields when you request setup. We’ll confirm the details before arranging payment.</p>`}
       </section>
     </div>` : `<div class="shell inner service-page">
       ${breadcrumbs(trail)}
@@ -395,18 +400,14 @@ for (const [topicId, service] of Object.entries(services)) {
         </section>
         <section class="application-panel service-request" aria-labelledby="quote-title">
           ${service.plans ? `<h2 id="quote-title">Choose your setup plan</h2>
+          <p class="service-payment-note">${checkoutNote}</p>
           <div class="service-plans">${service.plans.map(plan => `<section class="service-plan">
             <h3>${escape(plan.title)}</h3>
             <p class="service-price"><strong>${usd(plan.price)}</strong> ${escape(plan.priceContext)}</p>
             <ul>${plan.deliverables.map(item => `<li>${escape(item)}</li>`).join('')}</ul>
             <p class="source-note">${escape(plan.billing)}</p>
             <a class="button" href="${escape(plan.checkoutUrl)}">Pay ${usd(plan.price)} with PayPal</a>
-          </section>`).join('')}</div>
-          <div id="after-payment" class="service-payment-note">
-            <h3>After paying</h3>
-            <p>Checkout is through Tool &amp; Page on Payhip. Download the setup guide from your Payhip confirmation. Use your purchase email in the private intake form, then add your plan and receipt reference to the setup notes.</p>
-            <a class="text-link" href="${escape(serviceRequestUrl)}">Open private setup form</a>
-          </div>` : `<h2 id="quote-title">Request a quote</h2>
+          </section>`).join('')}</div>` : `<h2 id="quote-title">Request a quote</h2>
           <p>Share your store link, email, and what you want set up. We’ll reply with the scope and price.</p>
           <a class="button" href="${escape(serviceRequestUrl)}">Open the request form</a>`}
         </section>

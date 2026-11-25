@@ -34,7 +34,7 @@ export const services = {
     scope: 'Live setup covers one Shopify store and one compatible tracking app.',
     customerExperience: 'The store menu opens the general lookup. When your app and email template support direct links, the shipping email button opens the order or shipment’s tracking result. Some setups ask shoppers to verify their order details first. We confirm whether your email will use a direct link or the general lookup before setup.',
     workflow: [
-      'We verify your receipt and confirm which tracking app, email link, and test order we can use.',
+      'We review your checkout details and email you to confirm which tracking app, email link, and test order we can use.',
       'For the live setup, approve the changes and grant Shopify collaborator access, or join a screen share to apply them with us.',
     ],
   },

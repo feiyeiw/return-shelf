@@ -13,10 +13,10 @@ const app = (name, slug) => [name + ' on the Shopify App Store', 'https://apps.s
 
 export const homeQuestions = [
   ['What is Commerce Shelf?',
-    'Commerce Shelf is an independent directory of Shopify apps for store operations. You can compare apps for returns, order tracking, preorders and restock alerts, invoices and packing slips, and local delivery and pickup.',
+    'Commerce Shelf is an independent directory of Shopify tools for store operations. Compare apps for returns, tracking, preorders, invoices, and local delivery, or get hands-on setup for tracking pages and packing slips.',
     ['Browse the five topics', '/#directory']],
   ['Where does Commerce Shelf get its app information?',
-    'Commerce Shelf uses public Shopify App Store listings and vendor websites. Tool pages link to both sources and display the date pricing was checked. The “Best for” description is an editorial comparison aid.',
+    'Commerce Shelf uses public Shopify App Store listings and vendor websites. App pages link to both sources and display the date pricing was checked. The “Best for” description is an editorial comparison aid.',
     ['See an example tool page', '/tools/17track/']],
   ['What is the difference between a free plan and free to install?',
     'A free plan is a usage tier with no listed recurring price and may have limits. Free to install means there is no installation charge. Recurring plans, usage charges, or eligibility conditions can still apply after installation.',

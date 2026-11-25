@@ -213,7 +213,7 @@ dd { color: var(--muted); margin: 0; }
 .application-panel li + li { margin-top: .32rem; }
 .application-panel .source-note { margin-top: .85rem; padding-top: .7rem; border-top: 1px solid var(--line); }
 
-.service-offer { display: flex; align-items: center; justify-content: space-between; gap: 1rem 1.75rem; flex-wrap: wrap; margin-top: 1.15rem; padding: clamp(1rem, 2.7vw, 1.55rem); border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: .75rem; background: var(--white); }
+.service-offer { display: flex; align-items: center; justify-content: space-between; gap: 1rem 1.75rem; flex-wrap: wrap; margin-bottom: 1.15rem; padding: clamp(1rem, 2.7vw, 1.55rem); border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: .75rem; background: var(--white); }
 .service-offer > div { flex: 1 1 22rem; }
 .service-provider { color: var(--blue-dark); font-size: .875rem; font-weight: 700; }
 .service-offer h2 { margin-top: .35rem; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1; }
@@ -231,6 +231,7 @@ dd { color: var(--muted); margin: 0; }
 .service-plan .service-price { margin: .16rem 0 .45rem; }
 .service-plan .source-note { margin-top: .65rem; padding: 0; border: 0; }
 .service-payment-note { margin-top: 1rem; color: var(--muted); }
+.service-request .service-payment-note { margin: 0 0 .85rem; }
 .service-request h2 { scroll-margin-top: 1.5rem; }
 .article-related .service-guide-link { margin-top: .8rem; }
 
@@ -240,7 +241,6 @@ dd { color: var(--muted); margin: 0; }
 .packing-price strong { font-size: clamp(1.65rem, 3vw, 2.2rem); color: var(--blue-dark); }
 .packing-price span, .packing-scope { color: var(--muted); }
 .packing-page .button { margin-top: 1rem; }
-.packing-page .service-payment-note .text-link { display: inline-block; margin-top: .45rem; }
 .packing-sample { margin: 0; padding: clamp(.9rem, 3vw, 2rem); background: var(--lavender); border-radius: .8rem; }
 .packing-sheet { padding: clamp(.75rem, 2.4vw, 1.5rem); border: 1px solid var(--line); background: var(--white); }
 .packing-sheet-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem .75rem; }

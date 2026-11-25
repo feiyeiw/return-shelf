@@ -1,6 +1,6 @@
 # Commerce Shelf
 
-An independent Shopify app directory with five topics. The returns listings are in [directory.mjs](directory.mjs). The topic descriptions and other listings are in [shopify.mjs](shopify.mjs). Each tool page links to its Shopify source and official website.
+An independent Shopify tool directory with five topics. The returns listings are in [directory.mjs](directory.mjs). The topic descriptions and other app listings are in [shopify.mjs](shopify.mjs). Each app page links to its Shopify source and official website. Each Commerce Shelf setup service counts as one entry in its topic.
 
 ## Build and deploy
 
@@ -26,7 +26,7 @@ The sponsor page opens a public GitHub issue template for applications. To activ
 
 ## Setup services
 
-The tracking and invoice topics link to service scopes and one-time checkout links in [services.mjs](services.mjs). Tool & Page hosts checkout on Payhip and accepts PayPal. The Payhip download guides customers to the private setup form. Review submissions in the Responses tab of the Commerce Shelf Shopify Setup Request form and match the purchase email and receipt reference to a completed Payhip payment before scheduling.
+The tracking and invoice topics link to service scopes and one-time checkout links in [services.mjs](services.mjs). Tool & Page hosts checkout on Payhip and accepts PayPal. Customers enter their store details in the Payhip checkout questions before paying. In Payhip, open Customers, find the paid order, and view its details to read the checkout answers. Confirm the setup and next steps using the purchase email.
 
 For a tracking preview, use a separate preview and test inbox. Start the 30-day period when you send the preview URL.
 
