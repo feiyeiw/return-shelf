@@ -23,3 +23,7 @@ The form sends only the submitted email to the server-side Resend Contacts API. 
 ## Sponsorship
 
 The sponsor page opens a public GitHub issue template for applications. To activate checkout after approving an offer, supply a live Stripe Payment Link in `STRIPE_PAYMENT_LINK` at build time, then redeploy. No Stripe API key is required. Approved listings can be marked as sponsored in the corresponding listings file.
+
+## Setup services
+
+The tracking and invoice topics link to service scopes in [services.mjs](services.mjs). Merchants request a quote through the public responder link. Review inquiries in the Responses tab of the Commerce Shelf Shopify Setup Request form.

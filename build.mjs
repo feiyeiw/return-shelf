@@ -4,6 +4,7 @@ import { topics, additionalTools } from './shopify.mjs';
 import { homeQuestions, topicQuestions, returnCategoryQuestions, toolQuestions, sponsorQuestions } from './faq.mjs';
 import { topicGuides } from './guides.mjs';
 import { articles } from './articles.mjs';
+import { serviceRequestUrl, services } from './services.mjs';
 
 const siteName = 'Commerce Shelf';
 const siteUrl = 'https://commerceshelf.com';
@@ -30,6 +31,7 @@ const categoryUrl = id => `/categories/${id}/`;
 const topicUrl = id => `/shopify/${id}/`;
 const toolUrl = id => `/tools/${id}/`;
 const articleUrl = article => `/guides/${article.slug}/`;
+const serviceUrl = service => `/services/${service.slug}/`;
 const topicOf = tool => tool.topic || 'returns';
 const count = n => `${n} ${n === 1 ? 'tool' : 'tools'}`;
 const icon = symbol => `<span class="icon icon--${symbol}" aria-hidden="true"><i></i></span>`;
@@ -157,7 +159,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=blog">
+  <link rel="stylesheet" href="/assets/directory.css?v=services">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -301,6 +303,7 @@ await page('index.html', {
 for (const [id, topic] of Object.entries(topics)) {
   const items = toolsForTopic(id);
   const guide = topicGuides[id];
+  const service = services[id];
   await page(`shopify/${id}/index.html`, {
     title: guide.title,
     description: guide.description,
@@ -315,10 +318,47 @@ for (const [id, topic] of Object.entries(topics)) {
         ${icon(topic.symbol)}
       </header>
       ${topicNavigation(id)}
+      ${service ? `<section class="service-offer" aria-labelledby="service-offer-title">
+        <div>
+          <p class="service-provider">Setup by Commerce Shelf</p>
+          <h2 id="service-offer-title">${escape(service.title)}</h2>
+          <p class="service-summary">${escape(service.summary)}</p>
+        </div>
+        <a class="button" href="${serviceUrl(service)}">Request setup</a>
+      </section>` : ''}
       <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
       ${buyingGuide(guide, articles[id])}
       ${questions('Common questions', topicQuestions[id])}
+    </div>`,
+  });
+}
+
+for (const [topicId, service] of Object.entries(services)) {
+  const trail = [...topicTrail(topicId), [service.title, serviceUrl(service)]];
+  await page(`services/${service.slug}/index.html`, {
+    title: service.title,
+    description: service.summary,
+    trail,
+    body: `<div class="shell inner service-page">
+      ${breadcrumbs(trail)}
+      <header class="inner-heading">
+        <h1>${escape(service.title)}</h1>
+        <p class="lede">${escape(service.summary)}</p>
+      </header>
+      <div class="sponsor-information">
+        <section aria-labelledby="service-details">
+          <h2 id="service-details">What we set up</h2>
+          <ul>${service.deliverables.map(item => `<li>${escape(item)}</li>`).join('')}</ul>
+          <p>${escape(service.scope)}</p>
+          <a class="text-link" href="${articleUrl(articles[topicId])}">Read the setup guide</a>
+        </section>
+        <section class="application-panel service-request" aria-labelledby="quote-title">
+          <h2 id="quote-title">Request a quote</h2>
+          <p>Share your store link, email, and what you want set up. We’ll reply with the scope and price.</p>
+          <a class="button" href="${escape(serviceRequestUrl)}">Open the request form</a>
+        </section>
+      </div>
     </div>`,
   });
 }
@@ -382,6 +422,7 @@ for (const [topicId, article] of blogArticles) {
             <h2 id="article-related-title">Apps in the directory</h2>
             <ul>${article.tools.map(id => `<li><a class="text-link" href="${toolUrl(id)}">${escape(toolsById.get(id).name)}</a></li>`).join('')}</ul>
             <a class="button" href="${topicUrl(topicId)}">${escape(article.compareLabel)}</a>
+            ${services[topicId] ? `<p class="service-guide-link"><a class="text-link" href="${serviceUrl(services[topicId])}">Get setup help from Commerce Shelf</a></p>` : ''}
           </section>
         </div>
       </div>
@@ -493,7 +534,7 @@ await page('sponsor/index.html', {
       <figure class="sponsor-preview">
         <figcaption>Example placement</figcaption>
         <div class="preview-list">
-          <div class="preview-topic">${icon(topics.tracking.symbol)}<strong>${escape(topics.tracking.title)}</strong></div>
+          <div class="preview-topic">${icon(topics.preorders.symbol)}<strong>${escape(topics.preorders.title)}</strong></div>
           <div class="preview-app">
             <div><strong>Your Shopify app</strong><span class="badge">Sponsored</span></div>
             <p>At the top of the topic’s comparison list.</p>
@@ -509,7 +550,7 @@ await page('sponsor/index.html', {
           <div><dt>Position</dt><dd>At the top of one topic list. For returns apps, placement is at the top of the relevant subcategory.</dd></div>
           <div><dt>Term</dt><dd>30 days. We confirm availability, the start date, and pricing after review.</dd></div>
           <div><dt>Label</dt><dd>Sponsored appears on your directory listing and your app detail page.</dd></div>
-          <div><dt>Eligibility</dt><dd>Live Shopify apps that fit <a class="text-link" href="/#directory">one of the directory’s topics</a>.</dd></div>
+          <div><dt>Eligibility</dt><dd>Live Shopify apps for <a class="text-link" href="/shopify/returns/">returns</a>, <a class="text-link" href="/shopify/preorders/">preorders and restock</a>, or <a class="text-link" href="/shopify/local-delivery/">local delivery and pickup</a>.</dd></div>
         </dl>
       </section>
       <section class="application-panel" id="application" aria-labelledby="application-heading">

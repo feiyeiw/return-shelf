@@ -213,6 +213,17 @@ dd { color: var(--muted); margin: 0; }
 .application-panel li + li { margin-top: .32rem; }
 .application-panel .source-note { margin-top: .85rem; padding-top: .7rem; border-top: 1px solid var(--line); }
 
+.service-offer { display: flex; align-items: center; justify-content: space-between; gap: 1rem 1.75rem; flex-wrap: wrap; margin-top: 1.15rem; padding: clamp(1rem, 2.7vw, 1.55rem); border: 1px solid var(--line); border-left: 3px solid var(--blue); border-radius: .75rem; background: var(--white); }
+.service-offer > div { flex: 1 1 22rem; }
+.service-provider { color: var(--blue-dark); font-size: .875rem; font-weight: 700; }
+.service-offer h2 { margin-top: .35rem; font-size: clamp(2rem, 3.5vw, 2.8rem); line-height: 1; }
+.service-summary { max-width: 65ch; margin-top: .45rem; color: var(--muted); }
+.service-page .sponsor-information { margin-top: clamp(1.55rem, 4vw, 3rem); }
+.service-page ul { margin: 0 0 .95rem; padding-left: 1.25rem; }
+.service-page li + li { margin-top: .45rem; }
+.service-page .text-link, .service-request .button { display: inline-flex; margin-top: .85rem; }
+.article-related .service-guide-link { margin-top: .8rem; }
+
 .faq { display: grid; grid-template-columns: minmax(11rem, .42fr) minmax(0, 1fr); gap: clamp(1rem, 3.4vw, 3rem); margin-top: clamp(2.3rem, 5.5vw, 4.9rem); padding-top: clamp(1rem, 2.6vw, 1.9rem); border-top: 1px solid var(--line); scroll-margin-top: 1rem; }
 .faq h2 { max-width: 13ch; font-size: clamp(2.15rem, 4.4vw, 3.35rem); }
 .faq-answer { padding-block: .85rem; scroll-margin-top: 1rem; }
