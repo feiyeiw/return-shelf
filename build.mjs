@@ -323,7 +323,7 @@ for (const [id, topic] of Object.entries(topics)) {
           <p class="service-provider">Setup by Commerce Shelf</p>
           <h2 id="service-offer-title">${escape(service.title)}</h2>
           <p class="service-summary">${escape(service.summary)}</p>
-          ${service.plans ? `<p class="service-price">${service.plans.map(plan => `<strong>${usd(plan.price)}</strong> ${escape(plan.shortLabel)}`).join(' or ')}. App fees are separate.</p>` : `<p class="service-price"><strong>${usd(service.price)}</strong> one-time setup.</p>`}
+          ${service.plans ? `<p class="service-price">${service.plans.map(plan => `<strong>${usd(plan.price)}</strong> ${escape(plan.shortLabel)}`).join(' or ')}.</p>` : `<p class="service-price"><strong>${usd(service.price)}</strong> one-time setup.</p>`}
         </div>
         <a class="button" href="${serviceUrl(service)}">See what you get</a>
       </section>` : ''}
