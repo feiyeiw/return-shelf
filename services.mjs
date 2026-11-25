@@ -43,7 +43,7 @@ export const services = {
     title: 'Custom Shopify packing slip',
     summary: 'We set up the piece of paper that goes in each box, with your logo and a list of what’s in that shipment. Your team prints it straight from Shopify Orders.',
     price: 19,
-    checkoutUrl: '',
+    checkoutUrl: 'https://payhip.com/buy?link=AuJxK',
     scope: 'One Shopify store, one template, one paper size.',
   },
 };
