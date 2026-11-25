@@ -159,7 +159,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=setup-handoff">
+  <link rel="stylesheet" href="/assets/directory.css?v=tracking-plans">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -323,7 +323,7 @@ for (const [id, topic] of Object.entries(topics)) {
           <p class="service-provider">Setup by Commerce Shelf</p>
           <h2 id="service-offer-title">${escape(service.title)}</h2>
           <p class="service-summary">${escape(service.summary)}</p>
-          ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price${id === 'tracking' ? ' · app subscription separate' : ''}</p>` : ''}
+          ${service.plans ? `<p class="service-price">${service.plans.map(plan => `<strong>${usd(plan.price)}</strong> ${escape(plan.shortLabel)}`).join(' or ')}. App fees are separate.</p>` : ''}
         </div>
         <a class="button" href="${serviceUrl(service)}">${service.workflow ? 'See what you get' : 'Request setup'}</a>
       </section>` : ''}
@@ -346,21 +346,34 @@ for (const [topicId, service] of Object.entries(services)) {
       <header class="inner-heading">
         <h1>${escape(service.title)}</h1>
         <p class="lede">${escape(service.summary)}</p>
-        ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price · app subscription separate</p>` : ''}
+        ${service.plans ? '<a class="text-link" href="#quote-title">See prices and what’s included</a>' : ''}
       </header>
       <div class="sponsor-information">
         <section aria-labelledby="service-details">
-          <h2 id="service-details">${service.workflow ? 'What you get' : 'What we set up'}</h2>
-          <ul>${service.deliverables.map(item => `<li>${escape(item)}</li>`).join('')}</ul>
+          <h2 id="service-details">${service.customerExperience ? 'How tracking works' : 'What we set up'}</h2>
+          ${service.customerExperience ? `<p>${escape(service.customerExperience)}</p>` : ''}
+          ${service.deliverables ? `<ul>${service.deliverables.map(item => `<li>${escape(item)}</li>`).join('')}</ul>` : ''}
           <p>${escape(service.scope)}</p>
           ${service.workflow ? `<h2 class="service-workflow-heading">How it works</h2>
           <ol>${service.workflow.map(step => `<li>${escape(step)}</li>`).join('')}</ol>` : ''}
           <a class="text-link" href="${articleUrl(articles[topicId])}">${service.workflow ? 'Set it up yourself with the free guide' : 'Read the setup guide'}</a>
         </section>
         <section class="application-panel service-request" aria-labelledby="quote-title">
-          <h2 id="quote-title">${service.pilotPrice ? 'Request setup' : 'Request a quote'}</h2>
-          <p>Share your store link, email, and what you want set up. ${service.pilotPrice ? 'We’ll confirm compatibility and any app fees before starting.' : 'We’ll reply with the scope and price.'}</p>
-          <a class="button" href="${escape(serviceRequestUrl)}">${service.workflow ? 'Send your store details' : 'Open the request form'}</a>
+          ${service.plans ? `<h2 id="quote-title">Choose your setup plan</h2>
+          <div class="service-plans">${service.plans.map(plan => `<section class="service-plan">
+            <h3>${escape(plan.title)}</h3>
+            <p class="service-price"><strong>${usd(plan.price)}</strong> ${escape(plan.priceContext)}</p>
+            <ul>${plan.deliverables.map(item => `<li>${escape(item)}</li>`).join('')}</ul>
+            <p class="source-note">${escape(plan.billing)}</p>
+            <a class="button" href="${escape(plan.checkoutUrl)}">Pay ${usd(plan.price)} with PayPal</a>
+          </section>`).join('')}</div>
+          <div id="after-payment" class="service-payment-note">
+            <h3>After paying</h3>
+            <p>Checkout is through Tool &amp; Page on Payhip. Download the setup guide from your Payhip confirmation. Use your purchase email in the private intake form, then add your plan and receipt reference to the setup notes.</p>
+            <a class="text-link" href="${escape(serviceRequestUrl)}">Open private setup form</a>
+          </div>` : `<h2 id="quote-title">Request a quote</h2>
+          <p>Share your store link, email, and what you want set up. We’ll reply with the scope and price.</p>
+          <a class="button" href="${escape(serviceRequestUrl)}">Open the request form</a>`}
         </section>
       </div>
     </div>`,

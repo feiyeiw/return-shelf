@@ -3,19 +3,39 @@ export const serviceRequestUrl = 'https://docs.google.com/forms/d/e/1FAIpQLSfLIh
 export const services = {
   tracking: {
     slug: 'order-tracking-setup',
-    title: 'Add a Track Your Order page to Shopify',
-    pilotPrice: 29,
-    summary: 'We put a tracking page with your logo on your store, link it from your menu and one shipping email, and show you that both links work on a phone.',
-    deliverables: [
-      'A live Track Your Order page with your logo.',
-      'A store menu link and a link in one compatible shipping notification email.',
-      'The live page URL, a list of changes, and screenshots showing both links opening the page on mobile and the result of one test lookup.',
+    title: 'Set up a Track Your Order page for Shopify',
+    summary: 'Try a page with your logo and a test shipping email, or have us connect a live tracking page to your store menu and shipping email.',
+    plans: [
+      {
+        title: '30-day branded preview',
+        price: 6,
+        priceContext: 'for 30 days',
+        shortLabel: 'preview for 30 days',
+        billing: 'One payment. Buy again for another 30 days. No automatic renewal.',
+        deliverables: [
+          'A separate preview page with your logo and a tracking link in an email sent to your test inbox. Your live store menu and outgoing emails stay as they are.',
+          '30 days to try the preview and get help, starting the day we send your preview link.',
+        ],
+        checkoutUrl: 'https://payhip.com/buy?link=rNQhc',
+      },
+      {
+        title: 'Live Shopify installation',
+        price: 29,
+        priceContext: 'one time',
+        shortLabel: 'one-time live setup',
+        billing: 'One payment. No automatic renewal.',
+        deliverables: [
+          'A live tracking page with your logo, linked from your store menu and one compatible shipping email.',
+          'A mobile test of both links with a test order, followed by the live URL and a written list of changes.',
+        ],
+        checkoutUrl: 'https://payhip.com/buy?link=4RZrl',
+      },
     ],
-    scope: 'The pilot covers one Shopify store and one compatible tracking app.',
+    scope: 'Live setup covers one Shopify store and one compatible tracking app. The app provider bills any app subscription separately.',
+    customerExperience: 'The store menu opens the general lookup. When your app and email template support direct links, the shipping email button opens the order or shipment’s tracking result. Some setups ask shoppers to verify their order details first. We confirm whether your email will use a direct link or the general lookup before setup.',
     workflow: [
-      'Send your store URL and tell us which carrier or fulfillment service you use.',
-      'Approve the setup and grant Shopify collaborator access, or join a screen share to make the changes with us.',
-      'Provide an order for testing. Open the page from the store menu and a test shipping email, and check that it shows the expected shipment status.',
+      'We verify your receipt and confirm which app, email link, and test order we can use. We check compatibility and any app fees before starting.',
+      'For the live setup, approve the changes and grant Shopify collaborator access, or join a screen share to apply them with us.',
     ],
   },
   invoices: {

@@ -26,4 +26,6 @@ The sponsor page opens a public GitHub issue template for applications. To activ
 
 ## Setup services
 
-The tracking and invoice topics link to service scopes in [services.mjs](services.mjs). Merchants request a quote through the public responder link. Review inquiries in the Responses tab of the Commerce Shelf Shopify Setup Request form.
+The tracking and invoice topics link to service scopes in [services.mjs](services.mjs). Merchants request an invoice setup quote through the setup form. Review submissions in the Responses tab of the Commerce Shelf Shopify Setup Request form.
+
+Tracking plans use one-time Payhip checkout links from the Tool & Page store, with PayPal as the payment method. The Payhip download guides customers to the private setup form. Match the purchase email and receipt reference to a completed payment in Payhip before scheduling. Start the 30-day preview period when you send the preview URL. Use a separate preview and a test inbox for the preview order.
