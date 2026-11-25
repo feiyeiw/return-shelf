@@ -96,7 +96,7 @@ function breadcrumbs(trail) {
   ).join('')}</ol></nav>`;
 }
 
-function structuredData({ title, description, canonical, list, trail, published }) {
+function structuredData({ title, description, canonical, list, listAnchor = 'compare', trail, published }) {
   if (!canonical) return '';
   const publisher = {
     '@type': 'Organization', '@id': `${siteUrl}/#publisher`, name: siteName,
@@ -119,7 +119,7 @@ function structuredData({ title, description, canonical, list, trail, published 
     graph.push({ '@type': 'BreadcrumbList', '@id': breadcrumbId, itemListElement: listItems(trail) });
   }
   if (list) {
-    const listId = `${canonical}${canonical === `${siteUrl}/` ? '#directory' : '#compare'}`;
+    const listId = `${canonical}#${listAnchor}`;
     webPage.mainEntity = { '@id': listId };
     graph.push({ '@type': 'ItemList', '@id': listId, numberOfItems: list.length, itemListElement: listItems(list) });
   }
@@ -138,7 +138,7 @@ function structuredData({ title, description, canonical, list, trail, published 
 
 const toolListEntries = items => items.map(tool => [tool.name, toolUrl(tool.id)]);
 
-function layout({ title, description, body, active, canonical, list, trail, published }) {
+function layout({ title, description, body, active, canonical, list, listAnchor, trail, published }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -155,9 +155,9 @@ function layout({ title, description, body, active, canonical, list, trail, publ
   <meta property="og:image" content="${siteImage}">
   <meta property="og:image:alt" content="An open blue shipping box with a return label">
   <meta name="twitter:card" content="summary_large_image">` : ''}
-  ${structuredData({ title, description, canonical, list, trail, published })}
+  ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=articles">
+  <link rel="stylesheet" href="/assets/directory.css?v=blog">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -167,6 +167,7 @@ function layout({ title, description, body, active, canonical, list, trail, publ
       <a href="/" class="brand"><span class="brand-mark" aria-hidden="true"></span>${siteName}</a>
       <nav aria-label="Main navigation">
         <a href="/#directory"${active === 'directory' ? ' aria-current="true"' : ''}>Tools</a>
+        <a href="/blog/"${active === 'blog' ? ' aria-current="page"' : published ? ' aria-current="true"' : ''}>Blog</a>
         <a href="/sponsor/"${active === 'sponsor' ? ' aria-current="page"' : ''}>Sponsor</a>
       </nav>
     </div>
@@ -279,6 +280,7 @@ await page('index.html', {
   description: positioning,
   active: 'directory',
   list: Object.entries(topics).map(([id, topic]) => [topic.title, topicUrl(id)]),
+  listAnchor: 'directory',
   body: `<div class="shell home">
     <div class="home-directory">
       <div class="hero-copy">
@@ -322,13 +324,42 @@ for (const [id, topic] of Object.entries(topics)) {
 }
 
 const articleDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' });
-for (const [topicId, article] of Object.entries(articles)) {
+const blogArticles = Object.entries(articles).sort(([, a], [, b]) => b.published.localeCompare(a.published));
+const blogTrail = [...homeTrail, ['Blog', '/blog/']];
+await page('blog/index.html', {
+  title: 'Shopify Operations Blog',
+  description: 'Practical Shopify guides for setting up order tracking, printing packing slips, and running everyday store operations.',
+  active: 'blog',
+  trail: blogTrail,
+  list: blogArticles.map(([, article]) => [article.title, articleUrl(article)]),
+  listAnchor: 'articles',
+  body: `<div class="shell inner blog">
+    ${breadcrumbs(blogTrail)}
+    <header class="inner-heading">
+      <h1>Shopify operations blog</h1>
+      <p class="lede">Step-by-step guides for running your Shopify store.</p>
+    </header>
+    <ul class="blog-articles" id="articles">${blogArticles.map(([topicId, article]) => `<li>
+      <a class="blog-article" href="${articleUrl(article)}" aria-labelledby="${article.slug}">
+        ${icon(topics[topicId].symbol)}
+        <div>
+          <p class="blog-topic">${escape(topics[topicId].title)}</p>
+          <h2 id="${article.slug}">${escape(article.title)}</h2>
+          <p class="blog-description">${escape(article.description)}</p>
+        </div>
+        <time datetime="${article.published}">${articleDate.format(new Date(article.published))}</time>
+        ${chevron}
+      </a>
+    </li>`).join('')}</ul>
+  </div>`,
+});
+
+for (const [topicId, article] of blogArticles) {
   const trail = [...topicTrail(topicId), [article.title, articleUrl(article)]];
   await page(`guides/${article.slug}/index.html`, {
     title: article.title,
     description: article.description,
     published: article.published,
-    active: 'directory',
     trail,
     body: `<article class="shell inner article-page" id="article">
       ${breadcrumbs(trail)}
