@@ -4,13 +4,14 @@ export const services = {
   tracking: {
     slug: 'order-tracking-setup',
     title: 'Shopify order tracking setup',
+    pilotPrice: 59,
     summary: 'We set up a branded tracking page for your store and connect it to your menu and shipping emails.',
     deliverables: [
       'Review your carriers and confirm the tracking app that fits your store.',
       'Set up the branded page, the storefront menu link, and supported shipping email links.',
       'Test a pending shipment, a split order, and a delivery exception with examples available in your setup.',
     ],
-    scope: 'One Shopify store. We confirm app compatibility and the scope before quoting. You pay any app subscription directly.',
+    scope: 'One Shopify store and one compatible tracking app. We confirm compatibility before scheduling. Any app subscription is billed separately by the app provider.',
   },
   invoices: {
     slug: 'packing-slip-setup',

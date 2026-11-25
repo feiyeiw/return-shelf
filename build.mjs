@@ -159,7 +159,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=services">
+  <link rel="stylesheet" href="/assets/directory.css?v=setup-price">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -323,6 +323,7 @@ for (const [id, topic] of Object.entries(topics)) {
           <p class="service-provider">Setup by Commerce Shelf</p>
           <h2 id="service-offer-title">${escape(service.title)}</h2>
           <p class="service-summary">${escape(service.summary)}</p>
+          ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price${id === 'tracking' ? ' · app subscription separate' : ''}</p>` : ''}
         </div>
         <a class="button" href="${serviceUrl(service)}">Request setup</a>
       </section>` : ''}
@@ -354,8 +355,9 @@ for (const [topicId, service] of Object.entries(services)) {
           <a class="text-link" href="${articleUrl(articles[topicId])}">Read the setup guide</a>
         </section>
         <section class="application-panel service-request" aria-labelledby="quote-title">
-          <h2 id="quote-title">Request a quote</h2>
-          <p>Share your store link, email, and what you want set up. We’ll reply with the scope and price.</p>
+          <h2 id="quote-title">${service.pilotPrice ? 'Request setup' : 'Request a quote'}</h2>
+          ${service.pilotPrice ? `<p class="service-price"><strong>${usd(service.pilotPrice)}</strong> one-time pilot price</p>` : ''}
+          <p>Share your store link, email, and what you want set up. ${service.pilotPrice ? 'We’ll confirm the setup and next steps by email.' : 'We’ll reply with the scope and price.'}</p>
           <a class="button" href="${escape(serviceRequestUrl)}">Open the request form</a>
         </section>
       </div>
