@@ -3,6 +3,7 @@ import { categories, tools as returnTools, reviewed, listingUrl } from './direct
 import { topics, additionalTools } from './shopify.mjs';
 import { homeQuestions, topicQuestions, returnCategoryQuestions, toolQuestions, sponsorQuestions } from './faq.mjs';
 import { topicGuides } from './guides.mjs';
+import { articles } from './articles.mjs';
 
 const siteName = 'Commerce Shelf';
 const siteUrl = 'https://commerceshelf.com';
@@ -28,6 +29,7 @@ const escape = value => String(value).replace(/[&<>"']/g, char =>
 const categoryUrl = id => `/categories/${id}/`;
 const topicUrl = id => `/shopify/${id}/`;
 const toolUrl = id => `/tools/${id}/`;
+const articleUrl = article => `/guides/${article.slug}/`;
 const topicOf = tool => tool.topic || 'returns';
 const count = n => `${n} ${n === 1 ? 'tool' : 'tools'}`;
 const icon = symbol => `<span class="icon icon--${symbol}" aria-hidden="true"><i></i></span>`;
@@ -94,7 +96,7 @@ function breadcrumbs(trail) {
   ).join('')}</ol></nav>`;
 }
 
-function structuredData({ title, description, canonical, list, trail }) {
+function structuredData({ title, description, canonical, list, trail, published }) {
   if (!canonical) return '';
   const publisher = {
     '@type': 'Organization', '@id': `${siteUrl}/#publisher`, name: siteName,
@@ -121,13 +123,22 @@ function structuredData({ title, description, canonical, list, trail }) {
     webPage.mainEntity = { '@id': listId };
     graph.push({ '@type': 'ItemList', '@id': listId, numberOfItems: list.length, itemListElement: listItems(list) });
   }
+  if (published) {
+    const articleId = `${canonical}#article`;
+    webPage.mainEntity = { '@id': articleId };
+    graph.push({
+      '@type': 'Article', '@id': articleId, headline: title, description, inLanguage: 'en',
+      datePublished: published, mainEntityOfPage: { '@id': canonical },
+      author: { '@id': publisher['@id'] }, publisher: { '@id': publisher['@id'] },
+    });
+  }
   const json = JSON.stringify({ '@context': 'https://schema.org', '@graph': graph }).replace(/</g, '\\u003c');
   return `<script type="application/ld+json">${json}</script>`;
 }
 
 const toolListEntries = items => items.map(tool => [tool.name, toolUrl(tool.id)]);
 
-function layout({ title, description, body, active, canonical, list, trail }) {
+function layout({ title, description, body, active, canonical, list, trail, published }) {
   return `<!doctype html>
 <html lang="en">
 <head>
@@ -136,7 +147,7 @@ function layout({ title, description, body, active, canonical, list, trail }) {
   <title>${escape(title)} | ${siteName}</title>
   <meta name="description" content="${escape(description)}">
   ${canonical ? `<link rel="canonical" href="${canonical}">
-  <meta property="og:type" content="website">
+  <meta property="og:type" content="${published ? 'article' : 'website'}">
   <meta property="og:site_name" content="${siteName}">
   <meta property="og:title" content="${escape(title)} | ${siteName}">
   <meta property="og:description" content="${escape(description)}">
@@ -144,9 +155,9 @@ function layout({ title, description, body, active, canonical, list, trail }) {
   <meta property="og:image" content="${siteImage}">
   <meta property="og:image:alt" content="An open blue shipping box with a return label">
   <meta name="twitter:card" content="summary_large_image">` : ''}
-  ${structuredData({ title, description, canonical, list, trail })}
+  ${structuredData({ title, description, canonical, list, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=guides">
+  <link rel="stylesheet" href="/assets/directory.css?v=articles">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -205,7 +216,7 @@ function topicNavigation(activeId) {
   ).join('')}</nav>`;
 }
 
-function buyingGuide(guide) {
+function buyingGuide(guide, article) {
   return `<section class="buying-guide" id="guide" aria-labelledby="guide-heading">
     <h2 id="guide-heading">How to choose</h2>
     <p class="guide-summary">${escape(guide.summary)}</p>
@@ -218,6 +229,7 @@ function buyingGuide(guide) {
       </li>`;
     }).join('')}</ul>
     <div class="guide-check"><h3>Before you install</h3><p>${escape(guide.check)}</p></div>
+    ${article ? `<p class="guide-summary"><a class="text-link" href="${articleUrl(article)}">${escape(article.title)}</a></p>` : ''}
     <a class="text-link guide-method" href="/methodology/">How Commerce Shelf compares apps</a>
   </section>`;
 }
@@ -303,9 +315,46 @@ for (const [id, topic] of Object.entries(topics)) {
       ${topicNavigation(id)}
       <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
-      ${buyingGuide(guide)}
+      ${buyingGuide(guide, articles[id])}
       ${questions('Common questions', topicQuestions[id])}
     </div>`,
+  });
+}
+
+const articleDate = new Intl.DateTimeFormat('en-US', { dateStyle: 'long', timeZone: 'UTC' });
+for (const [topicId, article] of Object.entries(articles)) {
+  const trail = [...topicTrail(topicId), [article.title, articleUrl(article)]];
+  await page(`guides/${article.slug}/index.html`, {
+    title: article.title,
+    description: article.description,
+    published: article.published,
+    active: 'directory',
+    trail,
+    body: `<article class="shell inner article-page" id="article">
+      ${breadcrumbs(trail)}
+      <header class="inner-heading">
+        <h1>${escape(article.title)}</h1>
+        <p class="lede">${escape(article.intro)}</p>
+        <p class="article-byline">${siteName} <span aria-hidden="true">·</span> <time datetime="${article.published}">${articleDate.format(new Date(article.published))}</time></p>
+      </header>
+      <div class="article-layout">
+        <nav class="article-index" aria-label="On this page">
+          <p>On this page</p>
+          <ol>${article.sections.map(({ id, title }) => `<li><a class="text-link" href="#${id}">${escape(title)}</a></li>`).join('')}</ol>
+        </nav>
+        <div class="article-content">
+          ${article.sections.map(({ id, title, body }) => `<section id="${id}">
+            <h2>${escape(title)}</h2>
+            ${body}
+          </section>`).join('')}
+          <section class="article-related" aria-labelledby="article-related-title">
+            <h2 id="article-related-title">Apps in the directory</h2>
+            <ul>${article.tools.map(id => `<li><a class="text-link" href="${toolUrl(id)}">${escape(toolsById.get(id).name)}</a></li>`).join('')}</ul>
+            <a class="button" href="${topicUrl(topicId)}">${escape(article.compareLabel)}</a>
+          </section>
+        </div>
+      </div>
+    </article>`,
   });
 }
 

@@ -238,6 +238,30 @@ dd { color: var(--muted); margin: 0; }
 .methodology section { max-width: 50rem; margin-top: clamp(1.65rem, 4vw, 2.75rem); padding-top: 1rem; border-top: 1px solid var(--line); }
 .methodology > .button { margin-top: 1.6rem; }
 
+.article-page .inner-heading h1 { max-width: 23ch; font-size: clamp(2.65rem, 6.25vw, 5.85rem); line-height: .99; }
+.article-page .inner-heading .lede { max-width: 64ch; }
+.article-byline { margin-top: 1rem; color: var(--muted); font-size: .875rem; }
+.article-layout { display: grid; grid-template-columns: minmax(10rem, 14.5rem) minmax(0, 45rem); gap: clamp(1.25rem, 5vw, 4rem); align-items: start; margin-top: clamp(1.5rem, 4vw, 3rem); }
+.article-index { padding: 1rem 1.15rem; border: 1px solid var(--line); border-radius: .75rem; background: var(--white); font-size: .92rem; }
+.article-index p { font-weight: 700; }
+.article-index ol { margin: .55rem 0 0; padding-left: 1.25rem; }
+.article-index li + li { margin-top: .4rem; }
+.article-content { line-height: 1.65; }
+.article-content section { scroll-margin-top: 1.5rem; }
+.article-content section + section { margin-top: clamp(1.8rem, 4vw, 3.25rem); }
+.article-content h2 { margin-bottom: .85rem; font-size: clamp(2rem, 4vw, 3.05rem); line-height: 1; }
+.article-content p + p { margin-top: .65rem; }
+.article-content ol, .article-content ul { margin: .75rem 0; padding-left: 1.45rem; }
+.article-content li + li { margin-top: .55rem; }
+.article-content code { color: var(--blue-dark); overflow-wrap: anywhere; }
+.article-content .source-note { margin-top: .65rem; }
+.article-checklist, .article-related { padding: clamp(.95rem, 2.4vw, 1.35rem); border-radius: .75rem; background: var(--lavender); }
+.article-checklist { margin: .85rem 0; }
+.article-checklist dt { font-weight: 700; }
+.article-checklist dd { margin: .1rem 0 .7rem; }
+.article-checklist dd:last-child { margin-bottom: 0; }
+.article-related .button { margin-top: .25rem; }
+
 @media (max-width: 60rem) {
   .shell { width: calc(100% - 3rem); }
   .topic-grid { grid-template-columns: repeat(6, minmax(0, 1fr)); }
@@ -265,6 +289,7 @@ dd { color: var(--muted); margin: 0; }
   .tool-overview { grid-template-columns: 1fr; grid-template-areas: 'heading' 'pricing' 'facts'; }
   .tool-heading h1, .sponsor h1 { font-size: clamp(2.75rem, 9vw, 4.55rem); }
   .related-tools { grid-template-columns: 1fr; }
+  .article-layout { grid-template-columns: minmax(0, 1fr); }
   .guide-examples { grid-template-columns: 1fr; }
   .faq { grid-template-columns: 1fr; }
   .faq h2 { max-width: none; }
