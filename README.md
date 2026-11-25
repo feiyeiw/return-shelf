@@ -26,6 +26,8 @@ The sponsor page opens a public GitHub issue template for applications. To activ
 
 ## Setup services
 
-The tracking and invoice topics link to service scopes in [services.mjs](services.mjs). Merchants request an invoice setup quote through the setup form. Review submissions in the Responses tab of the Commerce Shelf Shopify Setup Request form.
+The tracking and invoice topics link to service scopes and one-time checkout links in [services.mjs](services.mjs). Tool & Page hosts checkout on Payhip and accepts PayPal. The Payhip download guides customers to the private setup form. Review submissions in the Responses tab of the Commerce Shelf Shopify Setup Request form and match the purchase email and receipt reference to a completed Payhip payment before scheduling.
 
-Tracking plans use one-time Payhip checkout links from the Tool & Page store, with PayPal as the payment method. The Payhip download guides customers to the private setup form. Match the purchase email and receipt reference to a completed payment in Payhip before scheduling. Start the 30-day preview period when you send the preview URL. Use a separate preview and a test inbox for the preview order.
+For a tracking preview, use a separate preview and test inbox. Start the 30-day period when you send the preview URL.
+
+The US$19 packing slip service covers one store, one template, and one paper size. Confirm the logo, fields, and paper size, then provide one full-shipment PDF and one split-shipment PDF. Set the template as the default after the merchant approves the samples and share the print instructions.

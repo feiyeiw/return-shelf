@@ -42,11 +42,8 @@ export const services = {
     slug: 'packing-slip-setup',
     title: 'Custom Shopify packing slip',
     summary: 'We set up the piece of paper that goes in each box, with your logo and a list of what’s in that shipment. Your team prints it straight from Shopify Orders.',
-    deliverables: [
-      'Customize one default Shopify packing slip with your logo, order reference, SKUs, and quantities.',
-      'Verify that a split shipment shows the items and quantities packed in that shipment.',
-      'Provide a PDF proof and show your team how to print slips individually or in bulk.',
-    ],
-    scope: 'One default packing slip in one Shopify store. We confirm the fields, paper size, and print workflow before quoting.',
+    price: 19,
+    checkoutUrl: '',
+    scope: 'One Shopify store, one template, one paper size.',
   },
 };

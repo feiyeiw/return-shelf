@@ -159,7 +159,7 @@ function layout({ title, description, body, active, canonical, list, listAnchor,
   <meta name="twitter:card" content="summary_large_image">` : ''}
   ${structuredData({ title, description, canonical, list, listAnchor, trail, published })}
   <link rel="icon" href="/assets/return-shelf.png" type="image/png">
-  <link rel="stylesheet" href="/assets/directory.css?v=tracking-plans">
+  <link rel="stylesheet" href="/assets/directory.css?v=packing-slip-setup">
   <script type="module" src="/assets/subscribe.js"></script>
 </head>
 <body>
@@ -323,9 +323,9 @@ for (const [id, topic] of Object.entries(topics)) {
           <p class="service-provider">Setup by Commerce Shelf</p>
           <h2 id="service-offer-title">${escape(service.title)}</h2>
           <p class="service-summary">${escape(service.summary)}</p>
-          ${service.plans ? `<p class="service-price">${service.plans.map(plan => `<strong>${usd(plan.price)}</strong> ${escape(plan.shortLabel)}`).join(' or ')}. App fees are separate.</p>` : ''}
+          ${service.plans ? `<p class="service-price">${service.plans.map(plan => `<strong>${usd(plan.price)}</strong> ${escape(plan.shortLabel)}`).join(' or ')}. App fees are separate.</p>` : `<p class="service-price"><strong>${usd(service.price)}</strong> one-time setup.</p>`}
         </div>
-        <a class="button" href="${serviceUrl(service)}">${service.workflow ? 'See what you get' : 'Request setup'}</a>
+        <a class="button" href="${serviceUrl(service)}">See what you get</a>
       </section>` : ''}
       <div class="section-head listing-head" id="compare"><h2>${count(items.length)} to compare</h2><p class="section-meta"><a class="text-link" href="#guide">Buying guide</a><a class="text-link" href="#faq">FAQ</a></p></div>
       ${id === 'returns' ? returnGroups : toolList(items, topic.featureLabel)}
@@ -341,15 +341,15 @@ for (const [topicId, service] of Object.entries(services)) {
     title: service.title,
     description: service.summary,
     trail,
-    body: topicId === 'invoices' ? `<div class="shell inner packing-preview">
+    body: topicId === 'invoices' ? `<div class="shell inner packing-page">
       ${breadcrumbs(trail)}
       <div class="packing-hero">
         <header class="inner-heading">
           <h1>${escape(service.title)}</h1>
           <p class="lede">${escape(service.summary)}</p>
-          <div class="packing-price"><strong>${usd(19)}</strong><span>Proposed one-time price</span></div>
-          <p class="packing-scope">One Shopify store, one template, one paper size.</p>
-          <a class="button" href="#delivery">See what you get</a>
+          <div class="packing-price"><strong>${usd(service.price)}</strong><span>One-time payment</span></div>
+          <p class="packing-scope">${escape(service.scope)}</p>
+          <a class="button" href="${escape(service.checkoutUrl || serviceRequestUrl)}">${service.checkoutUrl ? `Pay ${usd(service.price)} with PayPal` : 'Request setup'}</a>
         </header>
         <figure class="packing-sample">
           <div class="packing-sheet">
@@ -370,7 +370,11 @@ for (const [topicId, service] of Object.entries(services)) {
           <li><h3>A template installed in Shopify</h3><p>Once you approve the samples, we set up the template as your store’s default packing slip.</p></li>
           <li><h3>Printing instructions for your team</h3><p>Print one slip or a batch from Shopify Orders. Shopify fills in the shipment contents each time.</p></li>
         </ol>
-        <a class="text-link" href="https://commerceshelf.com/services/packing-slip-setup/">View the current service and request a quote</a>
+        ${service.checkoutUrl ? `<div id="after-payment" class="service-payment-note">
+          <h3>After paying</h3>
+          <p>Checkout is through Tool &amp; Page on Payhip. Download the setup guide from your Payhip confirmation, then use your purchase email and Payhip receipt reference to submit your store details.</p>
+          <a class="text-link" href="${escape(serviceRequestUrl)}">Open private setup form</a>
+        </div>` : `<p class="service-payment-note">Send your store URL, paper size, and preferred fields when you request setup. We’ll confirm the details before arranging payment.</p>`}
       </section>
     </div>` : `<div class="shell inner service-page">
       ${breadcrumbs(trail)}

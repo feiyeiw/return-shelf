@@ -239,7 +239,8 @@ dd { color: var(--muted); margin: 0; }
 .packing-price { display: flex; flex-wrap: wrap; align-items: baseline; gap: .25rem .7rem; margin-top: 1.25rem; }
 .packing-price strong { font-size: clamp(1.65rem, 3vw, 2.2rem); color: var(--blue-dark); }
 .packing-price span, .packing-scope { color: var(--muted); }
-.packing-preview .button { margin-top: 1rem; }
+.packing-page .button { margin-top: 1rem; }
+.packing-page .service-payment-note .text-link { display: inline-block; margin-top: .45rem; }
 .packing-sample { margin: 0; padding: clamp(.9rem, 3vw, 2rem); background: var(--lavender); border-radius: .8rem; }
 .packing-sheet { padding: clamp(.75rem, 2.4vw, 1.5rem); border: 1px solid var(--line); background: var(--white); }
 .packing-sheet-header { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: baseline; gap: .2rem .75rem; }
