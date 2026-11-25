@@ -333,11 +333,11 @@ dd { color: var(--muted); margin: 0; }
 }
 
 @media (max-width: 23rem) {
-  .header-row { gap: .65rem; flex-wrap: wrap; }
+  .header-row { gap: .45rem; flex-wrap: wrap; }
   .brand { font-size: .94rem; gap: .4rem; }
   .brand-mark { width: 1.6rem; height: 1.6rem; }
-  .header-row nav { gap: .65rem; min-height: 2.4rem; }
-  .header-row nav a { font-size: .85rem; }
+  .header-row nav { gap: .45rem; min-height: 2.4rem; }
+  .header-row nav a { font-size: .8rem; }
   .form-row { flex-direction: column; }
   .details > div { grid-template-columns: 1fr; }
 }
